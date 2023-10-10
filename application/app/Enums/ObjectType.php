@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Enums;
+
+enum ObjectType: string
+{
+    case User = 'USER';
+    case InstitutionUser = 'INSTITUTION_USER';
+    case Role = 'ROLE';
+    case Institution = 'INSTITUTION';
+    case Vendor = 'VENDOR';
+    case InstitutionDiscount = 'INSTITUTION_DISCOUNT';
+    case Project = 'PROJECT';
+    case Subproject = 'SUBPROJECT';
+    case Assignment = 'ASSIGNMENT';
+    case Volume = 'VOLUME'; // TODO: Subsumed by ASSIGNMENT?
+    case TranslationMemory = 'TRANSLATION_MEMORY';
+
+    public static function values(): array
+    {
+        return array_column(ObjectType::cases(), 'value');
+    }
+}
