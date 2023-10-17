@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\PrivilegeKey;
-use App\Models\Event;
+use App\Models\EventRecord;
 use BadMethodCallException;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,7 +20,7 @@ class EventPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(object $user, Event $event): bool
+    public function view(object $user, EventRecord $event): bool
     {
         return Auth::hasPrivilege(PrivilegeKey::ViewAuditLog->value);
     }
@@ -36,7 +36,7 @@ class EventPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(object $user, Event $event): bool
+    public function update(object $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -44,7 +44,7 @@ class EventPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(object $user, Event $event): bool
+    public function delete(object $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -52,7 +52,7 @@ class EventPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(object $user, Event $event): bool
+    public function restore(object $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -60,7 +60,7 @@ class EventPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(object $user, Event $event): bool
+    public function forceDelete(object $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }

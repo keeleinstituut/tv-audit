@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\AuditLogEvent;
 use SyncTools\Events\MessageEventFactory;
 
 return [
@@ -23,13 +24,19 @@ return [
     */
     'consumer' => [
         'queues' => [
-            //
-        ],
-        'events' => [
-            'mode' => MessageEventFactory::MODE_ROUTING_KEY,
-            'map' => [
-                //
+            [
+                'queue' => 'audit-log-events',
+                'bindings' => [
+                    ['exchange' => 'audit-log-events'],
+                ],
             ],
         ],
+        'events' => [
+            'mode' => MessageEventFactory::MODE_QUEUE,
+            'map' => [
+                'audit-log-events' => AuditLogEvent::class,
+            ],
+        ],
+        'enable_manual_acknowledgment' => true,
     ],
 ];
