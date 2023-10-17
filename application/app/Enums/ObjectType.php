@@ -13,7 +13,7 @@ enum ObjectType: string
     case Project = 'PROJECT';
     case Subproject = 'SUBPROJECT';
     case Assignment = 'ASSIGNMENT';
-    case Volume = 'VOLUME'; // TODO: Subsumed by ASSIGNMENT?
+    case Volume = 'VOLUME'; // TODO: Could be subsumed by ASSIGNMENT?
     case TranslationMemory = 'TRANSLATION_MEMORY';
 
     public static function values(): array
