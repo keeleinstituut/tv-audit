@@ -25,6 +25,8 @@ return new class extends Migration
 
             $table->uuid('acting_institution_user_id')->nullable();
             $table->string('acting_user_pic')->nullable();
+            $table->string('acting_user_forename')->nullable();
+            $table->string('acting_user_surname')->nullable();
         });
 
         DB::statement(
@@ -82,11 +84,13 @@ return new class extends Migration
                 CASE
                     WHEN event_type = 'FINISH_PROJECT' THEN (
                         event_parameters->'project_id' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 1
+                        AND event_parameters->'project_ext_id' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 2
                     )
                     WHEN event_type = 'REWIND_WORKFLOW' THEN (
                         event_parameters->'workflow_id' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 1
+                        AND event_parameters->'workflow_name' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 2
                     )
                     WHEN event_type = 'DISPATCH_NOTIFICATION' THEN (
                         count_jsonb_object_keys(event_parameters) > 0  -- TODO!
@@ -94,10 +98,11 @@ return new class extends Migration
                     WHEN event_type = 'DOWNLOAD_PROJECT_FILE' THEN (
                         event_parameters->'media_id' IS NOT NULL
                         AND event_parameters->'project_id' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 2
+                        AND event_parameters->'file_name' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 3
                     )
                     WHEN event_type = 'EXPORT_PROJECTS_REPORT' THEN (
-                        (event_parameters ??& array['start_date', 'end_date', 'status'])
+                        (event_parameters ??& array['query_start_date', 'query_end_date', 'query_status'])
                         AND count_jsonb_object_keys(event_parameters) = 3
                     )
                     WHEN event_type = 'MODIFY_OBJECT' THEN (
@@ -107,22 +112,29 @@ return new class extends Migration
                         AND event_parameters->'post_modification_subset' IS NOT NULL
                         AND count_jsonb_object_keys(event_parameters) = 4
                     )
-                    WHEN event_type IN ('REMOVE_OBJECT', 'CREATE_OBJECT') THEN (
+                    WHEN event_type = 'REMOVE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
-                        AND event_parameters->'object_id' IS NOT NULL
+                        AND event_parameters->'object_identity_subset' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 2
+                    )
+                    WHEN event_type = 'CREATE_OBJECT' THEN (
+                        event_parameters->>'object_type' IN $objectTypeSetSql
+                        AND event_parameters->'object_data' IS NOT NULL
                         AND count_jsonb_object_keys(event_parameters) = 2
                     )
                     WHEN event_type IN ('IMPORT_TRANSLATION_MEMORY', 'EXPORT_TRANSLATION_MEMORY') THEN (
                         event_parameters->'translation_memory_id' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 1
+                        AND event_parameters->'translation_memory_name' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 2
                     )
                     WHEN event_type IN ('SEARCH_LOGS', 'EXPORT_LOGS') THEN (
-                        (event_parameters ??& array['start_datetime', 'end_datetime', 'event_type', 'query_text'])
-                        AND count_jsonb_object_keys(event_parameters) = 4
+                        (event_parameters ??& array['query_start_datetime', 'query_end_datetime', 'query_event_type', 'query_text', 'query_department_id'])
+                        AND count_jsonb_object_keys(event_parameters) = 5
                     )
                     WHEN event_type IN ('APPROVE_ASSIGNMENT_RESULT', 'REJECT_ASSIGNMENT_RESULT', 'COMPLETE_ASSIGNMENT') THEN (
                         event_parameters->'assignment_id' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 1
+                        AND event_parameters->'assignment_ext_id' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 2
                     )
                     WHEN event_type IN ('LOG_IN', 'LOG_OUT', 'SELECT_INSTITUTION', 'EXPORT_INSTITUTION_USERS') THEN event_parameters IS NULL
                 ELSE FALSE
@@ -138,14 +150,11 @@ return new class extends Migration
             'INSTITUTION_USER',
             'ROLE',
             'INSTITUTION',
-
             'VENDOR',
             'INSTITUTION_DISCOUNT',
             'PROJECT',
             'SUBPROJECT',
             'ASSIGNMENT',
-            'VOLUME', // TODO: Subsumed by ASSIGNMENT?
-
             'TRANSLATION_MEMORY',
         ];
 
@@ -163,6 +172,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('event_records');
         DB::statement('DROP FUNCTION count_jsonb_object_keys(jsonb);');
-
     }
 };

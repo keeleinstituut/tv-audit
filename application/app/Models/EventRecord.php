@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\EventType;
-use App\Enums\FailureType;
+use AuditLogClient\Enums\AuditLogEventFailureType;
+use AuditLogClient\Enums\AuditLogEventType;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -20,14 +20,16 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property string|null $deleted_at
  * @property Carbon|null $happened_at
- * @property EventType|null $event_type
  * @property string|null $trace_id
  * @property string|null $acting_institution_user_id
  * @property string|null $context_institution_id
  * @property string|null $context_department_id
  * @property string|null $acting_user_pic
  * @property array|null $event_parameters
- * @property FailureType|null $failure_type
+ * @property AuditLogEventType $event_type
+ * @property AuditLogEventFailureType|null $failure_type If not null, then the attempted action failed. The reason of failure is described by this column.
+ * @property string|null $acting_user_forename
+ * @property string|null $acting_user_surname
  *
  * @method static Builder|EventRecord newModelQuery()
  * @method static Builder|EventRecord newQuery()
@@ -48,6 +50,8 @@ use Illuminate\Support\Carbon;
  * @method static Builder|EventRecord whereActingUserPic($value)
  * @method static Builder|EventRecord whereContextDepartmentId($value)
  * @method static Builder|EventRecord whereContextInstitutionId($value)
+ * @method static Builder|EventRecord whereActingUserForename($value)
+ * @method static Builder|EventRecord whereActingUserSurname($value)
  *
  * @mixin Eloquent
  */
@@ -60,8 +64,8 @@ class EventRecord extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'event_type' => EventType::class,
-        'failure_type' => FailureType::class,
+        'event_type' => AuditLogEventType::class,
+        'failure_type' => AuditLogEventFailureType::class,
         'event_parameters' => 'array',
         'happened_at' => 'datetime',
     ];
