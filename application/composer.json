@@ -8,7 +8,7 @@
         "php": "^8.2",
         "darkaonline/l5-swagger": "^8.5",
         "keeleinstituut/tv-common-laravel-amqp": "0.0.28",
-        "keeleinstituut/tv-common-laravel-security": "0.0.14",
+        "keeleinstituut/tv-common-laravel-security": "0.0.17",
         "laravel/framework": "^10.0",
         "laravel/tinker": "^2.8"
     },

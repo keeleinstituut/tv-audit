@@ -5,7 +5,7 @@ namespace App\Events;
 use PhpAmqpLib\Message\AMQPMessage;
 use SyncTools\Events\BaseConsumedEvent;
 
-class AuditLogEvent extends BaseConsumedEvent
+class IncomingAuditLogMessageEvent extends BaseConsumedEvent
 {
     public function __construct(public readonly AMQPMessage $message)
     {

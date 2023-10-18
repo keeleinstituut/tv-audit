@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Events\AuditLogEvent;
+use App\Events\IncomingAuditLogMessageEvent;
 use App\Listeners\AuditLogEventListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -14,7 +14,7 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        AuditLogEvent::class => [
+        IncomingAuditLogMessageEvent::class => [
             AuditLogEventListener::class,
         ],
     ];

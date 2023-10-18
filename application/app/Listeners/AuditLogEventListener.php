@@ -2,9 +2,9 @@
 
 namespace App\Listeners;
 
-use App\Events\AuditLogEvent;
+use App\Events\IncomingAuditLogMessageEvent;
 use App\Models\EventRecord;
-use App\Services\AuditLogEventValidationService;
+use AuditLogClient\Services\AuditLogMessageValidationService;
 use Illuminate\Validation\ValidationException;
 
 class AuditLogEventListener
@@ -12,7 +12,7 @@ class AuditLogEventListener
     /**
      * Create the event listener.
      */
-    public function __construct(private readonly AuditLogEventValidationService $validationService)
+    public function __construct(private readonly AuditLogMessageValidationService $validationService)
     {
     }
 
@@ -21,7 +21,7 @@ class AuditLogEventListener
      *
      * @throws ValidationException
      */
-    public function handle(AuditLogEvent $amqpEvent): void
+    public function handle(IncomingAuditLogMessageEvent $amqpEvent): void
     {
         $validator = $this->validationService->makeValidator($amqpEvent->getBody());
         $validator->validate();
@@ -31,7 +31,7 @@ class AuditLogEventListener
         $this->ackMessage($amqpEvent);
     }
 
-    public function ackMessage(AuditLogEvent $amqpEvent): void
+    public function ackMessage(IncomingAuditLogMessageEvent $amqpEvent): void
     {
         $amqpEvent->message->ack();
     }
