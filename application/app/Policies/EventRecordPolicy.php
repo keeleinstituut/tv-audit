@@ -17,7 +17,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny($user): bool
+    public function viewAny(mixed $user): bool
     {
         return Auth::hasPrivilege(PrivilegeKey::ViewAuditLog->value);
     }
@@ -25,7 +25,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can export audit logs.
      */
-    public function export($user): bool
+    public function export(mixed $user): bool
     {
         return Auth::hasPrivilege(PrivilegeKey::ExportAuditLog->value);
     }
@@ -33,7 +33,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create($user, string $jwt): bool
+    public function create(mixed $user, string $jwt): bool
     {
         return $this->syncRoleAuthChecker->isJwtAuthorized($jwt);
     }
@@ -41,7 +41,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view($user, EventRecord $event): bool
+    public function view(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -49,7 +49,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update($user, EventRecord $event): bool
+    public function update(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -57,7 +57,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete($user, EventRecord $event): bool
+    public function delete(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -65,7 +65,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore($user, EventRecord $event): bool
+    public function restore(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -73,7 +73,7 @@ readonly class EventRecordPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete($user, EventRecord $event): bool
+    public function forceDelete(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }

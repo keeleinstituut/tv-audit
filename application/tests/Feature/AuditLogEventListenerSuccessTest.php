@@ -41,6 +41,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
         $message = static::createRandomizedMessageBuilder()->toDownloadProjectFileEvent(
             Str::uuid()->toString(),
             Str::uuid()->toString(),
+            fake()->regexify('[A-Z]{3}-\d{4}-\d{2}-[STK]-\d{3}'),
             fake()->word().'.'.fake()->fileExtension()
         );
 
