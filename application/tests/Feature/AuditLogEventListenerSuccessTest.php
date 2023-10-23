@@ -181,7 +181,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
     {
         $message = static::createRandomizedMessageBuilder()->toModifyObjectEvent(
             $objectType,
-            Str::uuid()->toString(),
+            ObjectTypeBasedBodyCreators::buildObjectFromType($objectType),
             ObjectTypeBasedBodyCreators::buildObjectFromType($objectType),
             ObjectTypeBasedBodyCreators::buildObjectFromType($objectType)
         );

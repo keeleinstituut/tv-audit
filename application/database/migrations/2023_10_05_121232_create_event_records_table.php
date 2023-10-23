@@ -108,7 +108,7 @@ return new class extends Migration
                     )
                     WHEN event_type = 'MODIFY_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
-                        AND event_parameters->'object_id' IS NOT NULL
+                        AND event_parameters->'object_identity_subset' IS NOT NULL
                         AND event_parameters->'pre_modification_subset' IS NOT NULL
                         AND event_parameters->'post_modification_subset' IS NOT NULL
                         AND count_jsonb_object_keys(event_parameters) = 4
