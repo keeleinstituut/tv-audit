@@ -5,7 +5,10 @@ namespace App\Listeners;
 use App\Events\IncomingAuditLogMessageEvent;
 use App\Models\EventRecord;
 use AuditLogClient\Services\AuditLogMessageValidationService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use PhpAmqpLib\Wire\AMQPTable;
 
 class AuditLogEventListener
 {
@@ -20,9 +23,12 @@ class AuditLogEventListener
      * Handle the event.
      *
      * @throws ValidationException
+     * @throws AuthorizationException
      */
     public function handle(IncomingAuditLogMessageEvent $amqpEvent): void
     {
+        static::authorize($amqpEvent);
+
         $validator = $this->validationService->makeValidator($amqpEvent->getBody());
         $validator->validate();
 
@@ -34,5 +40,13 @@ class AuditLogEventListener
     public function ackMessage(IncomingAuditLogMessageEvent $amqpEvent): void
     {
         $amqpEvent->message->ack();
+    }
+
+    /** @throws AuthorizationException */
+    public static function authorize(IncomingAuditLogMessageEvent $amqpEvent): void
+    {
+        /** @var AMQPTable $applicationHeaders */
+        $applicationHeaders = $amqpEvent->message->get('application_headers');
+        Gate::authorize('create', [EventRecord::class, $applicationHeaders['jwt']]);
     }
 }
