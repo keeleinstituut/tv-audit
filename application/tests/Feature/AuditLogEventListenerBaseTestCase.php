@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PhpAmqpLib\Message\AMQPMessage;
 use SyncTools\AmqpConnectionRegistry;
+use Tests\AuthHelpers;
 use Tests\CreatesApplication;
 use Tests\TestCase;
 use Throwable;
@@ -53,6 +54,8 @@ class AuditLogEventListenerBaseTestCase extends TestCase
         Artisan::call('amqp:setup');
 
         $this->publisher = app(AuditLogPublisher::class);
+
+        AuthHelpers::fakeServiceValidationResponse();
     }
 
     protected function assertEventIsRecorded(AuditLogMessage $auditLogMessage): void

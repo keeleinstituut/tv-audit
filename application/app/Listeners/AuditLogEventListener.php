@@ -47,6 +47,6 @@ class AuditLogEventListener
     {
         /** @var AMQPTable $applicationHeaders */
         $applicationHeaders = $amqpEvent->message->get('application_headers');
-        Gate::authorize('create', [EventRecord::class, $applicationHeaders['jwt']]);
+        Gate::forUser(null)->authorize('create', [EventRecord::class, $applicationHeaders['jwt']]);
     }
 }
