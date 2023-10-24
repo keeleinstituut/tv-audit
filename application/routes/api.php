@@ -10,3 +10,12 @@
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+use App\Http\Controllers\EventRecordsController;
+
+Route::prefix('/event-records')
+    ->controller(EventRecordsController::class)
+    ->group(function (): void {
+        Route::get('/', 'index');
+        Route::get('/export', 'export');
+    });
