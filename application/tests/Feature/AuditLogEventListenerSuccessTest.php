@@ -208,6 +208,35 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
         //        $this->assertEventIsRecorded($message);
     }
 
+    /** @return array<array{ AuditLogEventType, ?array }> */
+    public static function provideEventTypesAndRandomEventParameters(): array
+    {
+        $eventParametersExamples = [
+            null,
+            [],
+            ['randomInput' => Str::uuid()->toString()],
+            ['randomArray' => [null, 'abc', 1]],
+        ];
+
+        return collect(AuditLogEventType::cases())
+            ->crossJoin($eventParametersExamples)
+            ->mapWithKeys(function (array $eventTypeAndEventParameters) {
+                [$eventType, $eventParameters] = $eventTypeAndEventParameters;
+                $eventParametersJSON = json_encode($eventParameters);
+
+                return ["$eventType->value ($eventParametersJSON)" => [$eventType, $eventParameters]];
+            })
+            ->all();
+    }
+
+    /** @dataProvider provideEventTypesAndRandomEventParameters */
+    public function test_events_with_unprocessable_entity_failure(AuditLogEventType $eventType, ?array $eventParameters)
+    {
+        $message = static::createRandomizedMessageBuilder()->toEventWithUnprocessableEntityFailure($eventType, $eventParameters);
+
+        $this->assertEventIsRecorded($message);
+    }
+
     private static function createRandomizedMessageBuilder(): AuditLogMessageBuilder
     {
         return AuditLogMessageBuilder::make(

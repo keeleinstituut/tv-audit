@@ -30,6 +30,7 @@ return new class extends Migration
         });
 
         DB::statement(
+            /** @lang PostgreSQL */
             "ALTER TABLE event_records
             ADD CONSTRAINT event_type_check
             CHECK (event_type IN (
@@ -56,18 +57,17 @@ return new class extends Migration
         );
 
         DB::statement(
+            /** @lang PostgreSQL */
             "ALTER TABLE event_records
             ADD CONSTRAINT failure_type_check
             CHECK (failure_type IN (
                 'UNPROCESSABLE_ENTITY',
-                'UNAUTHORIZED',
-                'FORBIDDEN',
-                'NOT_FOUND',
-                'SERVER_ERROR'
+                'FORBIDDEN'
             ))"
         );
 
         DB::statement(
+            /** @lang PostgreSQL */
             'CREATE OR REPLACE FUNCTION count_jsonb_object_keys(json_value JSONB)
             RETURNS BIGINT
             LANGUAGE sql IMMUTABLE
@@ -78,10 +78,12 @@ return new class extends Migration
 
         $objectTypeSetSql = self::getObjectTypesSqlSet();
         DB::statement(
+            /** @lang PostgreSQL */
             "ALTER TABLE event_records
             ADD CONSTRAINT event_parameters_check
             CHECK (
-                CASE
+                failure_type = 'UNPROCESSABLE_ENTITY'
+                OR CASE
                     WHEN event_type = 'FINISH_PROJECT' THEN (
                         event_parameters->'project_id' IS NOT NULL
                         AND event_parameters->'project_ext_id' IS NOT NULL
@@ -172,6 +174,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('event_records');
-        DB::statement('DROP FUNCTION count_jsonb_object_keys(jsonb);');
+        DB::statement(
+            /** @lang PostgreSQL */
+            'DROP FUNCTION count_jsonb_object_keys(jsonb);'
+        );
     }
 };
