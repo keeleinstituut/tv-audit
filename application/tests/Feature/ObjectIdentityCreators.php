@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use AuditLogClient\Enums\AuditLogEventObjectType;
-use Faker\Generator;
+use Illuminate\Support\Str;
 
 class ObjectIdentityCreators
 {
-    public static function buildObjectFromType(AuditLogEventObjectType $objectType): array
+    public static function buildObjectFromType(AuditLogEventObjectType $objectType): ?array
     {
         return match ($objectType) {
             AuditLogEventObjectType::InstitutionUser => ObjectIdentityCreators::institutionUser(),
@@ -53,31 +53,54 @@ class ObjectIdentityCreators
 
     public static function vendor(): array
     {
-        return ['TODO' => null]; // TODO
+        return [
+            'id' => fake()->uuid(),
+            'institution_user' => [
+                'id' => fake()->uuid(),
+                'user' => [
+                    'id' => fake()->uuid(),
+                    'personal_identification_code' => '60007116568',
+                    'forename' => fake()->firstName(),
+                    'surname' => fake()->lastName(),
+                ],
+            ],
+        ];
     }
 
-    public static function institutionDiscount(): array
+    public static function institutionDiscount(): null
     {
-        return ['TODO' => null]; // TODO
+        return null;
     }
 
     public static function assignment(): array
     {
-        return ['TODO' => null]; // TODO
+        return [
+            'id' => fake()->uuid(),
+            'ext_id' => Str::random(),
+        ];
     }
 
     public static function translationMemory(): array
     {
-        return ['TODO' => null]; // TODO
+        return [
+            'id' => fake()->uuid(),
+            'name' => fake()->company(),
+        ];
     }
 
     public static function project(): array
     {
-        return ['TODO' => null]; // TODO
+        return [
+            'id' => fake()->uuid(),
+            'ext_id' => Str::random(),
+        ];
     }
 
     public static function subproject(): array
     {
-        return ['TODO' => null]; // TODO
+        return [
+            'id' => fake()->uuid(),
+            'ext_id' => Str::random(),
+        ];
     }
 }

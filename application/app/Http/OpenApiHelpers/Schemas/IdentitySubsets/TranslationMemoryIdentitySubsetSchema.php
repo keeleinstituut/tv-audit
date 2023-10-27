@@ -6,7 +6,7 @@ use AuditLogClient\Enums\AuditLogEventObjectType;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: 'TRANSLATION_MEMORY (TODO)',
+    title: 'TRANSLATION_MEMORY',
     required: [
         'object_type',
         'object_identity_subset',
@@ -19,10 +19,12 @@ use OpenApi\Attributes as OA;
         ),
         new OA\Property(
             property: 'object_identity_subset',
-            required: null, // TODO
-            properties: [new OA\Property(property: 'TODO')], // TODO
+            required: ['id', 'name'],
+            properties: [
+                new OA\Property(property: 'id', type: 'string', format: 'uuid'),
+                new OA\Property(property: 'name', type: 'string'),
+            ],
             type: 'object',
-
         ),
     ],
     type: 'object'

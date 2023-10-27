@@ -6,7 +6,7 @@ use AuditLogClient\Enums\AuditLogEventObjectType;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: 'ASSIGNMENT (TODO)',
+    title: 'ASSIGNMENT',
     required: [
         'object_type',
         'object_identity_subset',
@@ -19,10 +19,12 @@ use OpenApi\Attributes as OA;
         ),
         new OA\Property(
             property: 'object_identity_subset',
-            required: null, // TODO
-            properties: [new OA\Property(property: 'TODO')], // TODO
+            required: ['id', 'ext_id'],
+            properties: [
+                new OA\Property(property: 'id', type: 'string', format: 'uuid'),
+                new OA\Property(property: 'ext_id', type: 'string'),
+            ],
             type: 'object',
-
         ),
     ],
     type: 'object'

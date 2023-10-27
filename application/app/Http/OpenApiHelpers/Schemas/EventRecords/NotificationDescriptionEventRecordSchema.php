@@ -7,7 +7,7 @@ use AuditLogClient\Enums\AuditLogEventType;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: 'Event record whose parameters describe a dispatched notification',
+    title: 'Event record whose parameters describe a dispatched notification (TODO)',
     allOf: [
         new OA\Schema(ref: EventRecords\EventRecordCommonSchema::class),
         new OA\Schema(

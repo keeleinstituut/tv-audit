@@ -117,7 +117,6 @@ class ObjectDataCreators
 
     public static function translationMemory(): array
     {
-        // TODO
         return [
             'name' => 'a',
         ];

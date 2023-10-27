@@ -6,7 +6,7 @@ use AuditLogClient\Enums\AuditLogEventObjectType;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: 'INSTITUTION_DISCOUNT (TODO)',
+    title: 'INSTITUTION_DISCOUNT',
     required: [
         'object_type',
         'object_identity_subset',
@@ -17,13 +17,7 @@ use OpenApi\Attributes as OA;
             type: 'string',
             enum: [AuditLogEventObjectType::InstitutionDiscount]
         ),
-        new OA\Property(
-            property: 'object_identity_subset',
-            required: null, // TODO
-            properties: [new OA\Property(property: 'TODO')], // TODO
-            type: 'object',
-
-        ),
+        new OA\Property(property: 'object_identity_subset', type: 'null'),
     ],
     type: 'object'
 )]
