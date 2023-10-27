@@ -102,7 +102,9 @@ return new class extends Migration
                         AND object_identity_subset->'institution_user'->'user'->'forename' IS NOT NULL
                         AND object_identity_subset->'institution_user'->'user'->'surname' IS NOT NULL
                     )
-                    WHEN object_type = 'INSTITUTION_DISCOUNT' THEN (object_identity_subset IS NULL)
+                    WHEN object_type = 'INSTITUTION_DISCOUNT' THEN (
+                        jsonb_typeof(object_identity_subset) = 'null'
+                    )
                     WHEN object_type IN ('PROJECT', 'SUBPROJECT', 'ASSIGNMENT') THEN (
                         object_identity_subset->'id' IS NOT NULL
                         AND object_identity_subset->'ext_id' IS NOT NULL
@@ -148,11 +150,13 @@ return new class extends Migration
                         event_parameters->>'object_type' IN $objectTypeSetSql
                         AND event_parameters->'pre_modification_subset' IS NOT NULL
                         AND event_parameters->'post_modification_subset' IS NOT NULL
+                        AND event_parameters ?? 'object_identity_subset'
                         AND count_jsonb_object_keys(event_parameters) = 4
                         AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
                     WHEN event_type = 'REMOVE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
+                        AND event_parameters ?? 'object_identity_subset'
                         AND count_jsonb_object_keys(event_parameters) = 2
                         AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
@@ -212,6 +216,10 @@ return new class extends Migration
         DB::statement(
             /** @lang PostgreSQL */
             'DROP FUNCTION count_jsonb_object_keys(jsonb);'
+        );
+        DB::statement(
+            /** @lang PostgreSQL */
+            'DROP FUNCTION is_object_identity_subset_valid(TEXT, JSONB);'
         );
     }
 };
