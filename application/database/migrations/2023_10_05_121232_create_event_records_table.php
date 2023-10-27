@@ -76,6 +76,42 @@ return new class extends Migration
             $$;'
         );
 
+        DB::statement(
+            /** @lang PostgreSQL */
+            "CREATE OR REPLACE FUNCTION is_object_identity_subset_valid(object_type TEXT, object_identity_subset JSONB)
+            RETURNS BOOLEAN
+            LANGUAGE sql IMMUTABLE
+            AS $$
+                SELECT CASE
+                    WHEN object_type = 'INSTITUTION_USER' THEN (
+                        object_identity_subset->'id' IS NOT NULL
+                        AND object_identity_subset->'user'->'id' IS NOT NULL
+                        AND object_identity_subset->'user'->'personal_identification_code' IS NOT NULL
+                        AND object_identity_subset->'user'->'forename' IS NOT NULL
+                        AND object_identity_subset->'user'->'surname' IS NOT NULL
+                    )
+                    WHEN object_type IN ('ROLE', 'INSTITUTION', 'TRANSLATION_MEMORY') THEN (
+                        object_identity_subset->'id' IS NOT NULL
+                        AND object_identity_subset->'name' IS NOT NULL
+                    )
+                    WHEN object_type = 'VENDOR' THEN (
+                        object_identity_subset->'id' IS NOT NULL
+                        AND object_identity_subset->'institution_user'->'id' IS NOT NULL
+                        AND object_identity_subset->'institution_user'->'user'->'id' IS NOT NULL
+                        AND object_identity_subset->'institution_user'->'user'->'personal_identification_code' IS NOT NULL
+                        AND object_identity_subset->'institution_user'->'user'->'forename' IS NOT NULL
+                        AND object_identity_subset->'institution_user'->'user'->'surname' IS NOT NULL
+                    )
+                    WHEN object_type = 'INSTITUTION_DISCOUNT' THEN (object_identity_subset IS NULL)
+                    WHEN object_type IN ('PROJECT', 'SUBPROJECT', 'ASSIGNMENT') THEN (
+                        object_identity_subset->'id' IS NOT NULL
+                        AND object_identity_subset->'ext_id' IS NOT NULL
+                    )
+                    ELSE FALSE
+                END;
+            $$;"
+        );
+
         $objectTypeSetSql = self::getObjectTypesSqlSet();
         DB::statement(
             /** @lang PostgreSQL */
@@ -112,63 +148,13 @@ return new class extends Migration
                         event_parameters->>'object_type' IN $objectTypeSetSql
                         AND event_parameters->'pre_modification_subset' IS NOT NULL
                         AND event_parameters->'post_modification_subset' IS NOT NULL
-                        AND jsonb_typeof(event_parameters->'object_identity_subset') = 'object'
                         AND count_jsonb_object_keys(event_parameters) = 4
-                        AND CASE event_parameters->>'object_type'
-                            WHEN 'INSTITUTION_USER' THEN (
-                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
-                                AND jsonb_typeof(event_parameters->'object_identity_subset'->'user') = 'object'
-                                AND event_parameters->'object_identity_subset'->'user'->'id' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'user'->'personal_identification_code' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'user'->'forename' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'user'->'surname' IS NOT NULL
-                            )
-                            WHEN 'ROLE' THEN (
-                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
-                            )
-                            WHEN 'INSTITUTION' THEN (
-                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
-                            )
-                            WHEN 'VENDOR' THEN (TRUE) -- TODO!
-                            WHEN 'INSTITUTION_DISCOUNT' THEN (TRUE) -- TODO!
-                            WHEN 'PROJECT' THEN (TRUE) -- TODO!
-                            WHEN 'SUBPROJECT' THEN (TRUE) -- TODO!
-                            WHEN 'ASSIGNMENT' THEN (TRUE) -- TODO!
-                            WHEN 'TRANSLATION_MEMORY' THEN (TRUE) -- TODO!
-                            ELSE FALSE
-                        END
+                        AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
                     WHEN event_type = 'REMOVE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
-                        AND jsonb_typeof(event_parameters->'object_identity_subset') = 'object'
                         AND count_jsonb_object_keys(event_parameters) = 2
-                        AND CASE event_parameters->>'object_type'
-                            WHEN 'INSTITUTION_USER' THEN (
-                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
-                                AND jsonb_typeof(event_parameters->'object_identity_subset'->'user') = 'object'
-                                AND event_parameters->'object_identity_subset'->'user'->'id' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'user'->'personal_identification_code' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'user'->'forename' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'user'->'surname' IS NOT NULL
-                            )
-                            WHEN 'ROLE' THEN (
-                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
-                            )
-                            WHEN 'INSTITUTION' THEN (
-                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
-                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
-                            )
-                            WHEN 'VENDOR' THEN (TRUE) -- TODO!
-                            WHEN 'INSTITUTION_DISCOUNT' THEN (TRUE) -- TODO!
-                            WHEN 'PROJECT' THEN (TRUE) -- TODO!
-                            WHEN 'SUBPROJECT' THEN (TRUE) -- TODO!
-                            WHEN 'ASSIGNMENT' THEN (TRUE) -- TODO!
-                            WHEN 'TRANSLATION_MEMORY' THEN (TRUE) -- TODO!
-                            ELSE FALSE
-                        END
+                        AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
                     WHEN event_type = 'CREATE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use AuditLogClient\Enums\AuditLogEventObjectType;
-use Faker\Generator;
 
 class ObjectIdentityCreators
 {
