@@ -159,7 +159,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
     {
         $message = static::createRandomizedMessageBuilder()->toRemoveObjectEvent(
             $objectType,
-            ObjectTypeBasedBodyCreators::buildObjectFromType($objectType)
+            ObjectIdentityCreators::buildObjectFromType($objectType)
         );
 
         $this->assertEventIsRecorded($message);
@@ -170,7 +170,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
     {
         $message = static::createRandomizedMessageBuilder()->toCreateObjectEvent(
             $objectType,
-            ObjectTypeBasedBodyCreators::buildObjectFromType($objectType)
+            ObjectDataCreators::buildObjectFromType($objectType)
         );
 
         $this->assertEventIsRecorded($message);
@@ -181,9 +181,9 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
     {
         $message = static::createRandomizedMessageBuilder()->toModifyObjectEvent(
             $objectType,
-            ObjectTypeBasedBodyCreators::buildObjectFromType($objectType),
-            ObjectTypeBasedBodyCreators::buildObjectFromType($objectType),
-            ObjectTypeBasedBodyCreators::buildObjectFromType($objectType)
+            ObjectIdentityCreators::buildObjectFromType($objectType),
+            ObjectDataCreators::buildObjectFromType($objectType),
+            ObjectDataCreators::buildObjectFromType($objectType)
         );
 
         $this->assertEventIsRecorded($message);
