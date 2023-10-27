@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\OpenApiHelpers;
+namespace App\Http\OpenApiHelpers\Schemas\EventRecords;
 
-use AuditLogClient\Enums\AuditLogEventFailureType;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
@@ -17,7 +16,6 @@ use OpenApi\Attributes as OA;
         'trace_id',
         'context_department_id',
         'context_institution_id',
-        'failure_type',
     ],
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid'),
@@ -29,7 +27,6 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'trace_id', type: 'string', nullable: true),
         new OA\Property(property: 'context_department_id', type: 'string', format: 'uuid', nullable: true),
         new OA\Property(property: 'context_institution_id', type: 'string', format: 'uuid', nullable: true),
-        new OA\Property(property: 'failure_type', type: 'string', enum: AuditLogEventFailureType::class, nullable: true),
     ],
     type: 'object'
 )]
