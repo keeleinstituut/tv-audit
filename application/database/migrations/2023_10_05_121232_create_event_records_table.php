@@ -100,8 +100,9 @@ return new class extends Migration
                     WHEN event_type = 'DOWNLOAD_PROJECT_FILE' THEN (
                         event_parameters->'media_id' IS NOT NULL
                         AND event_parameters->'project_id' IS NOT NULL
+                        AND event_parameters->'project_ext_id' IS NOT NULL
                         AND event_parameters->'file_name' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 3
+                        AND count_jsonb_object_keys(event_parameters) = 4
                     )
                     WHEN event_type = 'EXPORT_PROJECTS_REPORT' THEN (
                         (event_parameters ??& array['query_start_date', 'query_end_date', 'query_status'])
