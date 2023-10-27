@@ -82,7 +82,7 @@ return new class extends Migration
             "ALTER TABLE event_records
             ADD CONSTRAINT event_parameters_check
             CHECK (
-                failure_type = 'UNPROCESSABLE_ENTITY'
+                failure_type IS NOT NULL
                 OR CASE
                     WHEN event_type = 'FINISH_PROJECT' THEN (
                         event_parameters->'project_id' IS NOT NULL
