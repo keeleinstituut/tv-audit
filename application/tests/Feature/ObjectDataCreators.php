@@ -6,39 +6,38 @@ use App\Enums\PrivilegeKey;
 use AuditLogClient\Enums\AuditLogEventObjectType;
 use Illuminate\Support\Str;
 
-class ObjectTypeBasedBodyCreators
+class ObjectDataCreators
 {
     public static function buildObjectFromType(AuditLogEventObjectType $objectType): array
     {
         return match ($objectType) {
-            AuditLogEventObjectType::User => ObjectTypeBasedBodyCreators::buildExampleUser(),
-            AuditLogEventObjectType::InstitutionUser => ObjectTypeBasedBodyCreators::buildExampleInstitutionUser(),
-            AuditLogEventObjectType::Role => ObjectTypeBasedBodyCreators::buildExampleRole(),
-            AuditLogEventObjectType::Institution => ObjectTypeBasedBodyCreators::buildExampleInstitution(),
-            AuditLogEventObjectType::Vendor => ObjectTypeBasedBodyCreators::buildExampleVendorSubsets(),
-            AuditLogEventObjectType::InstitutionDiscount => ObjectTypeBasedBodyCreators::buildExampleInstitutionDiscount(),
-            AuditLogEventObjectType::Project => ObjectTypeBasedBodyCreators::buildExampleProject(),
-            AuditLogEventObjectType::Subproject => ObjectTypeBasedBodyCreators::buildExampleSubproject(),
-            AuditLogEventObjectType::Assignment => ObjectTypeBasedBodyCreators::buildExampleAssignment(),
-            AuditLogEventObjectType::TranslationMemory => ObjectTypeBasedBodyCreators::buildExampleTranslationMemory(),
+            AuditLogEventObjectType::InstitutionUser => ObjectDataCreators::institutionUser(),
+            AuditLogEventObjectType::Role => ObjectDataCreators::role(),
+            AuditLogEventObjectType::Institution => ObjectDataCreators::institution(),
+            AuditLogEventObjectType::Vendor => ObjectDataCreators::vendor(),
+            AuditLogEventObjectType::InstitutionDiscount => ObjectDataCreators::institutionDiscount(),
+            AuditLogEventObjectType::Project => ObjectDataCreators::project(),
+            AuditLogEventObjectType::Subproject => ObjectDataCreators::subproject(),
+            AuditLogEventObjectType::Assignment => ObjectDataCreators::assignment(),
+            AuditLogEventObjectType::TranslationMemory => ObjectDataCreators::translationMemory(),
         };
     }
 
-    public static function buildExampleUser(): array
+    public static function user(): array
     {
         return [
             'forename' => 'Test',
         ];
     }
 
-    public static function buildExampleInstitutionUser(): array
+    public static function institutionUser(): array
     {
         return [
             'email' => 'test@email.dev',
         ];
     }
 
-    public static function buildExampleRole(): array
+    public static function role(): array
     {
         return [
             'privileges' => [
@@ -48,7 +47,7 @@ class ObjectTypeBasedBodyCreators
         ];
     }
 
-    public static function buildExampleInstitution(): array
+    public static function institution(): array
     {
         return [
             'phone' => '+37266778899',
@@ -56,7 +55,7 @@ class ObjectTypeBasedBodyCreators
 
     }
 
-    public static function buildExampleVendorSubsets(): array
+    public static function vendor(): array
     {
         return [
             'prices' => [
@@ -89,7 +88,7 @@ class ObjectTypeBasedBodyCreators
         ];
     }
 
-    public static function buildExampleInstitutionDiscount(): array
+    public static function institutionDiscount(): array
     {
         return [
             'discount_percentage_0_49' => 0.0,
@@ -97,7 +96,7 @@ class ObjectTypeBasedBodyCreators
 
     }
 
-    public static function buildExampleAssignment(): array
+    public static function assignment(): array
     {
         return [
             'assignee' => [
@@ -116,7 +115,7 @@ class ObjectTypeBasedBodyCreators
         ];
     }
 
-    public static function buildExampleTranslationMemory(): array
+    public static function translationMemory(): array
     {
         // TODO
         return [
@@ -124,7 +123,7 @@ class ObjectTypeBasedBodyCreators
         ];
     }
 
-    public static function buildExampleProject(): array
+    public static function project(): array
     {
         return [
             'source_files' => [
@@ -138,7 +137,7 @@ class ObjectTypeBasedBodyCreators
         ];
     }
 
-    public static function buildExampleSubproject(): array
+    public static function subproject(): array
     {
         return [
             'assignments' => [
