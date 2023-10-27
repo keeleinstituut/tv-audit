@@ -109,15 +109,65 @@ return new class extends Migration
                     )
                     WHEN event_type = 'MODIFY_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
-                        AND event_parameters->'object_id' IS NOT NULL
                         AND event_parameters->'pre_modification_subset' IS NOT NULL
                         AND event_parameters->'post_modification_subset' IS NOT NULL
+                        AND jsonb_typeof(event_parameters->'object_identity_subset') = 'object'
                         AND count_jsonb_object_keys(event_parameters) = 4
+                        AND CASE event_parameters->>'object_type'
+                            WHEN 'INSTITUTION_USER' THEN (
+                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
+                                AND jsonb_typeof(event_parameters->'object_identity_subset'->'user') = 'object'
+                                AND event_parameters->'object_identity_subset'->'user'->'id' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'user'->'personal_identification_code' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'user'->'forename' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'user'->'surname' IS NOT NULL
+                            )
+                            WHEN 'ROLE' THEN (
+                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
+                            )
+                            WHEN 'INSTITUTION' THEN (
+                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
+                            )
+                            WHEN 'VENDOR' THEN (TRUE) -- TODO!
+                            WHEN 'INSTITUTION_DISCOUNT' THEN (TRUE) -- TODO!
+                            WHEN 'PROJECT' THEN (TRUE) -- TODO!
+                            WHEN 'SUBPROJECT' THEN (TRUE) -- TODO!
+                            WHEN 'ASSIGNMENT' THEN (TRUE) -- TODO!
+                            WHEN 'TRANSLATION_MEMORY' THEN (TRUE) -- TODO!
+                            ELSE FALSE
+                        END
                     )
                     WHEN event_type = 'REMOVE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
-                        AND event_parameters->'object_identity_subset' IS NOT NULL
+                        AND jsonb_typeof(event_parameters->'object_identity_subset') = 'object'
                         AND count_jsonb_object_keys(event_parameters) = 2
+                        AND CASE event_parameters->>'object_type'
+                            WHEN 'INSTITUTION_USER' THEN (
+                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
+                                AND jsonb_typeof(event_parameters->'object_identity_subset'->'user') = 'object'
+                                AND event_parameters->'object_identity_subset'->'user'->'id' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'user'->'personal_identification_code' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'user'->'forename' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'user'->'surname' IS NOT NULL
+                            )
+                            WHEN 'ROLE' THEN (
+                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
+                            )
+                            WHEN 'INSTITUTION' THEN (
+                                event_parameters->'object_identity_subset'->'id' IS NOT NULL
+                                AND event_parameters->'object_identity_subset'->'name' IS NOT NULL
+                            )
+                            WHEN 'VENDOR' THEN (TRUE) -- TODO!
+                            WHEN 'INSTITUTION_DISCOUNT' THEN (TRUE) -- TODO!
+                            WHEN 'PROJECT' THEN (TRUE) -- TODO!
+                            WHEN 'SUBPROJECT' THEN (TRUE) -- TODO!
+                            WHEN 'ASSIGNMENT' THEN (TRUE) -- TODO!
+                            WHEN 'TRANSLATION_MEMORY' THEN (TRUE) -- TODO!
+                            ELSE FALSE
+                        END
                     )
                     WHEN event_type = 'CREATE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
@@ -148,7 +198,6 @@ return new class extends Migration
     private static function getObjectTypesSqlSet(): string
     {
         $targetObjectTypes = [
-            'USER',
             'INSTITUTION_USER',
             'ROLE',
             'INSTITUTION',
