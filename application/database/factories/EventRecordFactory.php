@@ -7,6 +7,7 @@ use AuditLogClient\Enums\AuditLogEventFailureType;
 use AuditLogClient\Enums\AuditLogEventObjectType;
 use AuditLogClient\Enums\AuditLogEventType;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use SebastianBergmann\Type\ObjectType;
 
 /**
  * @extends Factory<EventRecord>
@@ -56,19 +57,13 @@ class EventRecordFactory extends Factory
             ],
             AuditLogEventType::ModifyObject => [
                 'object_type' => $objectType->value,
-                'object_identity_subset' => [
-                    'id' => fake()->unique()->uuid(),
-                    'name' => fake()->name(),
-                ],
+                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType),
                 'pre_modification_subset' => ['name' => fake()->name()],
                 'post_modification_subset' => ['name' => fake()->name()],
             ],
             AuditLogEventType::RemoveObject => [
                 'object_type' => $objectType->value,
-                'object_identity_subset' => [
-                    'id' => fake()->unique()->uuid(),
-                    'name' => fake()->name(),
-                ],
+                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType),
             ],
             AuditLogEventType::CompleteAssignment,
             AuditLogEventType::ApproveAssignmentResult,
@@ -111,6 +106,32 @@ class EventRecordFactory extends Factory
                 'query_text' => fake()->optional()->word(),
                 'query_department_id' => fake()->optional()->uuid(),
             ],
+        };
+    }
+
+    private function buildIdentitySubsetForObject(AuditLogEventObjectType $objectType): array
+    {
+        return match ($objectType) {
+            AuditLogEventObjectType::InstitutionUser => [
+                'id' => fake()->uuid(),
+                'user' => [
+                    'id' => fake()->uuid(),
+                    'personal_identification_code' => $this->faker->estonianPIC(),
+                    'forename' => fake()->firstName(),
+                    'surname' => fake()->lastName(),
+                ],
+            ],
+            AuditLogEventObjectType::Role,
+            AuditLogEventObjectType::Institution => [
+                'id' => fake()->uuid(),
+                'name' => fake()->colorName(),
+            ],
+            AuditLogEventObjectType::Vendor,
+            AuditLogEventObjectType::InstitutionDiscount,
+            AuditLogEventObjectType::Project,
+            AuditLogEventObjectType::Subproject,
+            AuditLogEventObjectType::Assignment,
+            AuditLogEventObjectType::TranslationMemory => ['TODO' => null], // TODO
         };
     }
 }
