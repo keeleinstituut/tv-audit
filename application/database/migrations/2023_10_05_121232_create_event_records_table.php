@@ -15,7 +15,7 @@ return new class extends Migration
             $table->softDeletesTz();
 
             $table->string('trace_id')->nullable();
-            $table->timestampTz('happened_at');
+            $table->timestampTz('happened_at', 3);
             $table->string('event_type');
             $table->jsonb('event_parameters')->nullable();
             $table->string('failure_type')->nullable()->comment('If not null, then the attempted action failed. The reason of failure is described by this column.');
