@@ -89,6 +89,10 @@ class AuditLogControllerTestCase extends TestCase
                             'id' => Str::uuid()->toString(),
                             'ext_id' => 'PPA-2023-01-K-354',
                         ],
+                        'object_identity_subset' => [
+                            'id' => Str::uuid()->toString(),
+                            'ext_id' => 'PPA-2023-01-K-354',
+                        ],
                     ],
                 ],
             ],

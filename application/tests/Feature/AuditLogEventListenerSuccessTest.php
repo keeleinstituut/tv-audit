@@ -8,12 +8,6 @@ use AuditLogClient\Services\AuditLogMessageBuilder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
-/**
- * Important notes:
- *  * These tests depend on RabbitMQ running and working.
- *  * These tests assume the audit-log-events queue is empty.
- *  ** Queue must be emptied if there are old messages in the way.
- */
 class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
 {
     public function test_finish_project_event()
@@ -170,7 +164,8 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
     {
         $message = static::createRandomizedMessageBuilder()->toCreateObjectEvent(
             $objectType,
-            ObjectDataCreators::buildObjectFromType($objectType)
+            ObjectDataCreators::buildObjectFromType($objectType),
+            ObjectIdentityCreators::buildObjectFromType($objectType)
         );
 
         $this->assertEventIsRecorded($message);
