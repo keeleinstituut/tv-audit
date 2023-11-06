@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\IncomingAuditLogMessageEvent;
 use App\Models\EventRecord;
+use AuditLogClient\DataTransferObjects\AuditLogMessage;
 use AuditLogClient\Services\AuditLogMessageValidationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
@@ -29,12 +30,24 @@ class AuditLogEventListener
     {
         static::authorize($amqpEvent);
 
-        $validator = $this->validationService->makeValidator($amqpEvent->getBody());
+        $this->createEventRecord($amqpEvent->getBody());
+
+        $this->ackMessage($amqpEvent);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function createEventRecord(AuditLogMessage|array $message): void
+    {
+        if (is_a($message, AuditLogMessage::class)) {
+            $message = $message->toArray();
+        }
+
+        $validator = $this->validationService->makeValidator($message);
         $validator->validate();
 
         EventRecord::create($validator->validated());
-
-        $this->ackMessage($amqpEvent);
     }
 
     public function ackMessage(IncomingAuditLogMessageEvent $amqpEvent): void

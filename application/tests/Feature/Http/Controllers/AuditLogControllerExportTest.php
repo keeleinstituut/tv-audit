@@ -216,16 +216,23 @@ class AuditLogControllerExportTest extends AuditLogControllerTestCase
      */
     private function assertExportedFileContainsOnlyExpectedData(array $queryParameters, Collection $expectedEventRecords, string $institutionId): void
     {
+        $tolkevaravClaims = AuthHelpers::createTolkevaravClaims($institutionId, PrivilegeKey::ExportAuditLog);
+
         $response = $this
-            ->withHeaders(AuthHelpers::createAuthHeadersWithPrivilege($institutionId, PrivilegeKey::ExportAuditLog))
+            ->withHeaders([
+                config('amqp.audit_logs.trace_id_http_header') => static::TRACE_ID,
+                ...AuthHelpers::createAuthHeaders($tolkevaravClaims),
+            ])
             ->getJson(action([EventRecordsController::class, 'export'], $queryParameters));
 
         $response
             ->assertSuccessful()
             ->assertDownload('exported_events.csv');
 
+        $actualCsvData = collect(static::createCsvReader($response)->jsonSerialize());
+
         // And file data should contain users of first institution in expected format
-        $expectedResponseData = $expectedEventRecords
+        $expectedCsvData = $expectedEventRecords
             ->map(fn (EventRecord $event) => [
                 'Logikirje identifikaator' => $event->id,
                 'Toimumishetk' => $event->happened_at->toISOString(),
@@ -241,12 +248,40 @@ class AuditLogControllerExportTest extends AuditLogControllerTestCase
                 'Ebaõnnestumise põhjus (kui tegevus ebaõnnestus)' => $event->failure_type?->value ?? '',
             ]);
 
-        $actualResponseCsvDocument = static::createCsvReader($response);
+        $this->assertGreaterThanOrEqual($expectedCsvData->count(), $actualCsvData->count());
+        $this->assertLessThanOrEqual($expectedCsvData->count() + 1, $actualCsvData->count());
 
-        $this->assertArraysEqualIgnoringOrder(
-            $expectedResponseData->jsonSerialize(),
-            $actualResponseCsvDocument->jsonSerialize()
-        );
+        $actualCsvData
+            ->each(function (array $actualRow) use ($institutionId, $queryParameters, $tolkevaravClaims, $expectedCsvData) {
+                $expectedRow = $expectedCsvData->first(
+                    fn (array $row) => $row['Logikirje identifikaator'] === $actualRow['Logikirje identifikaator']
+                );
+
+                if (empty($expectedRow)) {
+                    // It’s the event record created by the request of this test
+                    $expectedSubset = [
+                        'Tegutseja isikukood' => $tolkevaravClaims['personalIdentificationCode'],
+                        'Tegutseja eesnimi' => $tolkevaravClaims['forename'],
+                        'Tegutseja perenimi' => $tolkevaravClaims['surname'],
+                        'Tegutseja andmeobjekti identifikaator' => $tolkevaravClaims['institutionUserId'],
+                        'Tegevuse tüüp' => AuditLogEventType::ExportLogs->value,
+                        'Tegevuse parameetrid' => json_encode(Arr::sortRecursive([
+                            'query_department_id' => $queryParameters['department_id'],
+                            'query_end_datetime' => $queryParameters['end_datetime'],
+                            'query_event_type' => $queryParameters['event_type'],
+                            'query_start_datetime' => $queryParameters['start_datetime'],
+                            'query_text' => $queryParameters['text'],
+                        ])),
+                        'Päringu jälgimise identifikator' => static::TRACE_ID,
+                        'Üksuse identifikaator' => '',
+                        'Asutuse identifikaator' => $institutionId,
+                        'Ebaõnnestumise põhjus (kui tegevus ebaõnnestus)' => '',
+                    ];
+                    $this->assertArrayHasSubsetIgnoringOrder($expectedSubset, $actualRow);
+                } else {
+                    $this->assertArraysEqualIgnoringOrder($actualRow, $expectedRow);
+                }
+            });
     }
 
     /**
