@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use SyncTools\AmqpConnectionRegistry;
 use Tests\AuthHelpers;
@@ -22,12 +23,6 @@ use Throwable;
 
 use function app;
 
-/**
- * Important notes:
- *  * These tests depend on RabbitMQ running and working.
- *  * These tests assume the audit-log-events queue is empty.
- *  ** Queue must be emptied if there are old messages in the way.
- */
 class AuditLogEventListenerBaseTestCase extends TestCase
 {
     use CreatesApplication, MockeryPHPUnitIntegration;
@@ -56,6 +51,10 @@ class AuditLogEventListenerBaseTestCase extends TestCase
         $this->publisher = app(AuditLogPublisher::class);
 
         AuthHelpers::fakeServiceValidationResponse();
+
+        /** @var AMQPChannel $channel */
+        $channel = app(AmqpConnectionRegistry::class)->getConnection()->channel();
+        $channel->queue_purge(env('AUDIT_LOG_EVENTS_QUEUE'));
     }
 
     protected function assertEventIsRecorded(AuditLogMessage $auditLogMessage): void

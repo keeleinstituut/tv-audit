@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class ObjectIdentityCreators
 {
-    public static function buildObjectFromType(AuditLogEventObjectType $objectType): ?array
+    public static function buildObjectFromType(AuditLogEventObjectType $objectType): array
     {
         return match ($objectType) {
             AuditLogEventObjectType::InstitutionUser => ObjectIdentityCreators::institutionUser(),
@@ -67,9 +67,15 @@ class ObjectIdentityCreators
         ];
     }
 
-    public static function institutionDiscount(): null
+    public static function institutionDiscount(): array
     {
-        return null; // TODO
+        return [
+            'id' => fake()->uuid(),
+            'institution' => [
+                'id' => fake()->uuid(),
+                'name' => fake()->company()
+            ]
+        ];
     }
 
     public static function assignment(): array
