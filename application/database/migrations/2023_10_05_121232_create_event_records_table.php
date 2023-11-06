@@ -47,6 +47,8 @@ return new class extends Migration
                 'REWIND_WORKFLOW',
                 'DISPATCH_NOTIFICATION',
                 'DOWNLOAD_PROJECT_FILE',
+                'DOWNLOAD_SUBPROJECT_CAT_XLIFF',
+                'DOWNLOAD_SUBPROJECT_TRANSLATIONS',
                 'EXPORT_INSTITUTION_USERS',
                 'EXPORT_PROJECTS_REPORT',
                 'EXPORT_TRANSLATION_MEMORY',
@@ -103,7 +105,9 @@ return new class extends Migration
                         AND object_identity_subset->'institution_user'->'user'->'surname' IS NOT NULL
                     )
                     WHEN object_type = 'INSTITUTION_DISCOUNT' THEN (
-                        jsonb_typeof(object_identity_subset) = 'null'
+                        object_identity_subset->'id' IS NOT NULL
+                        AND object_identity_subset->'institution'->'id' IS NOT NULL
+                        AND object_identity_subset->'institution'->'name' IS NOT NULL
                     )
                     WHEN object_type IN ('PROJECT', 'SUBPROJECT', 'ASSIGNMENT') THEN (
                         object_identity_subset->'id' IS NOT NULL
@@ -150,20 +154,22 @@ return new class extends Migration
                         event_parameters->>'object_type' IN $objectTypeSetSql
                         AND event_parameters->'pre_modification_subset' IS NOT NULL
                         AND event_parameters->'post_modification_subset' IS NOT NULL
-                        AND event_parameters ?? 'object_identity_subset'
+                        AND event_parameters->'object_identity_subset' IS NOT NULL
                         AND count_jsonb_object_keys(event_parameters) = 4
                         AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
                     WHEN event_type = 'REMOVE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
-                        AND event_parameters ?? 'object_identity_subset'
+                        AND event_parameters->'object_identity_subset' IS NOT NULL
                         AND count_jsonb_object_keys(event_parameters) = 2
                         AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
                     WHEN event_type = 'CREATE_OBJECT' THEN (
                         event_parameters->>'object_type' IN $objectTypeSetSql
                         AND event_parameters->'object_data' IS NOT NULL
-                        AND count_jsonb_object_keys(event_parameters) = 2
+                        AND event_parameters->'object_identity_subset' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 3
+                        AND is_object_identity_subset_valid(event_parameters->>'object_type', event_parameters->'object_identity_subset')
                     )
                     WHEN event_type IN ('IMPORT_TRANSLATION_MEMORY', 'EXPORT_TRANSLATION_MEMORY') THEN (
                         event_parameters->'translation_memory_id' IS NOT NULL
@@ -177,6 +183,11 @@ return new class extends Migration
                     WHEN event_type IN ('APPROVE_ASSIGNMENT_RESULT', 'REJECT_ASSIGNMENT_RESULT', 'COMPLETE_ASSIGNMENT') THEN (
                         event_parameters->'assignment_id' IS NOT NULL
                         AND event_parameters->'assignment_ext_id' IS NOT NULL
+                        AND count_jsonb_object_keys(event_parameters) = 2
+                    )
+                    WHEN event_type IN ('DOWNLOAD_SUBPROJECT_CAT_XLIFF', 'DOWNLOAD_SUBPROJECT_TRANSLATIONS') THEN (
+                        event_parameters->'subproject_id' IS NOT NULL
+                        AND event_parameters->'subproject_ext_id' IS NOT NULL
                         AND count_jsonb_object_keys(event_parameters) = 2
                     )
                     WHEN event_type IN ('LOG_IN', 'LOG_OUT', 'SELECT_INSTITUTION', 'EXPORT_INSTITUTION_USERS') THEN event_parameters IS NULL
