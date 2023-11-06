@@ -30,15 +30,17 @@ class EventRecordFactory extends Factory
             'context_department_id' => fake()->uuid(),
             'acting_user_pic' => $this->faker->estonianPIC(),
             'event_type' => fake()->randomElement(AuditLogEventType::values()),
-            'event_parameters' => fn (array $attributes) => $this->generateEventParameters($attributes['event_type']),
+            'event_parameters' => fn (array $attributes) => $this->generateEventParameters($attributes),
             'failure_type' => fake()->optional(0.1)->randomElement(AuditLogEventFailureType::values()),
             'acting_user_forename' => fake()->firstName(),
             'acting_user_surname' => fake()->lastName(),
         ];
     }
 
-    public function generateEventParameters(string $eventType): ?array
+    public function generateEventParameters(array $attributes): ?array
     {
+        ['event_type' => $eventType, 'context_institution_id' => $institutionId] = $attributes;
+
         $eventType = AuditLogEventType::from($eventType);
         /** @var AuditLogEventObjectType $objectType */
         $objectType = fake()->randomElement(AuditLogEventObjectType::cases());
@@ -54,16 +56,17 @@ class EventRecordFactory extends Factory
                     'id' => fake()->unique()->uuid(),
                     'name' => fake()->name(),
                 ],
+                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType, $institutionId),
             ],
             AuditLogEventType::ModifyObject => [
                 'object_type' => $objectType->value,
-                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType),
+                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType, $institutionId),
                 'pre_modification_subset' => ['name' => fake()->name()],
                 'post_modification_subset' => ['name' => fake()->name()],
             ],
             AuditLogEventType::RemoveObject => [
                 'object_type' => $objectType->value,
-                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType),
+                'object_identity_subset' => $this->buildIdentitySubsetForObject($objectType, $institutionId),
             ],
             AuditLogEventType::CompleteAssignment,
             AuditLogEventType::ApproveAssignmentResult,
@@ -106,10 +109,15 @@ class EventRecordFactory extends Factory
                 'query_text' => fake()->optional()->word(),
                 'query_department_id' => fake()->optional()->uuid(),
             ],
+            AuditLogEventType::DownloadSubProjectXliffs,
+            AuditLogEventType::DownloadSubProjectTranslations => [
+                'subproject_id' => fake()->uuid(),
+                'subproject_ext_id' => fake()->unique()->regexify('[A-Z]{3}-\d{4}-\d{2}-[STK]-\d{3}-[A-Z]{4}-\d'),
+            ],
         };
     }
 
-    private function buildIdentitySubsetForObject(AuditLogEventObjectType $objectType): ?array
+    private function buildIdentitySubsetForObject(AuditLogEventObjectType $objectType, string $institutionId): ?array
     {
         return match ($objectType) {
             AuditLogEventObjectType::InstitutionUser => [
@@ -139,7 +147,13 @@ class EventRecordFactory extends Factory
                     ],
                 ],
             ],
-            AuditLogEventObjectType::InstitutionDiscount => null,
+            AuditLogEventObjectType::InstitutionDiscount => [
+                'id' => fake()->uuid(),
+                'institution' => [
+                    'id' => $institutionId,
+                    'name' => fake()->company(),
+                ],
+            ],
             AuditLogEventObjectType::Project,
             AuditLogEventObjectType::Subproject,
             AuditLogEventObjectType::Assignment => [
