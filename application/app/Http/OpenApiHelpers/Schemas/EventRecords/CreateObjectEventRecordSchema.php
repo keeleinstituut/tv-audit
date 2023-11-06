@@ -3,7 +3,7 @@
 namespace App\Http\OpenApiHelpers\Schemas\EventRecords;
 
 use App\Http\OpenApiHelpers\Schemas\EventRecords;
-use AuditLogClient\Enums\AuditLogEventObjectType;
+use App\Http\OpenApiHelpers\Schemas\IdentitySubsets;
 use AuditLogClient\Enums\AuditLogEventType;
 use OpenApi\Attributes as OA;
 
@@ -22,15 +22,44 @@ use OpenApi\Attributes as OA;
                 ),
                 new OA\Property(
                     property: 'event_parameters',
-                    required: [
-                        'object_type',
-                        'object_data',
-                    ],
-                    properties: [
-                        new OA\Property(property: 'object_type', type: 'string', enum: AuditLogEventObjectType::class),
-                        new OA\Property(property: 'object_data', type: 'object'),
-                    ],
-                    type: 'object',
+                    oneOf: [
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\InstitutionIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\RoleIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\InstitutionUserIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\VendorIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\InstitutionDiscountIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\ProjectIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\SubprojectIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\AssignmentIdentitySubsetSchema::class),
+                        ]),
+                        new OA\Schema(allOf: [
+                            new OA\Schema(ref: EventRecords\CreateObjectEventParametersCommonSchema::class),
+                            new OA\Schema(ref: IdentitySubsets\TranslationMemoryIdentitySubsetSchema::class),
+                        ]),
+                    ]
                 ),
             ],
         ),

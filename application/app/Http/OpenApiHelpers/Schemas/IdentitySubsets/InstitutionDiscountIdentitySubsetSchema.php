@@ -17,7 +17,23 @@ use OpenApi\Attributes as OA;
             type: 'string',
             enum: [AuditLogEventObjectType::InstitutionDiscount]
         ),
-        new OA\Property(property: 'object_identity_subset', type: 'null'),
+        new OA\Property(
+            property: 'object_identity_subset',
+            required: ['id', 'institution'],
+            properties: [
+                new OA\Property(property: 'id', type: 'string', format: 'uuid'),
+                new OA\Property(
+                    property: 'institution',
+                    required: ['id', 'name'],
+                    properties: [
+                        new OA\Property(property: 'id', type: 'string', format: 'uuid'),
+                        new OA\Property(property: 'name', type: 'string'),
+                    ],
+                    type: 'object'
+                ),
+            ],
+            type: 'object'
+        ),
     ],
     type: 'object'
 )]
