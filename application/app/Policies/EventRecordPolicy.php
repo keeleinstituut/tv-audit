@@ -3,40 +3,53 @@
 namespace App\Policies;
 
 use App\Enums\PrivilegeKey;
-use App\Models\Event;
+use App\Models\EventRecord;
 use BadMethodCallException;
 use Illuminate\Support\Facades\Auth;
+use KeycloakAuthGuard\Middleware\EnsureJwtBelongsToServiceAccountWithSyncRole;
 
-class EventPolicy
+readonly class EventRecordPolicy
 {
+    public function __construct(private EnsureJwtBelongsToServiceAccountWithSyncRole $syncRoleAuthChecker)
+    {
+    }
+
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(object $user): bool
+    public function viewAny(mixed $user): bool
     {
         return Auth::hasPrivilege(PrivilegeKey::ViewAuditLog->value);
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the user can export audit logs.
      */
-    public function view(object $user, Event $event): bool
+    public function export(mixed $user): bool
     {
-        return Auth::hasPrivilege(PrivilegeKey::ViewAuditLog->value);
+        return Auth::hasPrivilege(PrivilegeKey::ExportAuditLog->value);
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(object $user): bool
+    public function create(mixed $user, string $jwt): bool
     {
-        return false; // TODO: Check authenticated with service account JWT
+        return $this->syncRoleAuthChecker->isJwtAuthorized($jwt);
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(mixed $user, EventRecord $event): bool
+    {
+        throw new BadMethodCallException();
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(object $user, Event $event): bool
+    public function update(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -44,7 +57,7 @@ class EventPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(object $user, Event $event): bool
+    public function delete(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -52,7 +65,7 @@ class EventPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(object $user, Event $event): bool
+    public function restore(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -60,7 +73,7 @@ class EventPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(object $user, Event $event): bool
+    public function forceDelete(mixed $user, EventRecord $event): bool
     {
         throw new BadMethodCallException();
     }
@@ -101,6 +114,6 @@ class EventScope implements IScope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where('institution_id', Auth::user()->institutionId);
+        $builder->where('context_institution_id', Auth::user()->institutionId);
     }
 }

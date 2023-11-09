@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\IncomingAuditLogMessageEvent;
 use SyncTools\Events\MessageEventFactory;
 
 return [
@@ -23,13 +24,28 @@ return [
     */
     'consumer' => [
         'queues' => [
-            //
-        ],
-        'events' => [
-            'mode' => MessageEventFactory::MODE_ROUTING_KEY,
-            'map' => [
-                //
+            [
+                'queue' => env('AUDIT_LOG_EVENTS_QUEUE'),
+                'bindings' => [
+                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE')],
+                ],
             ],
         ],
+        'events' => [
+            'mode' => MessageEventFactory::MODE_QUEUE,
+            'map' => [
+                env('AUDIT_LOG_EVENTS_QUEUE') => IncomingAuditLogMessageEvent::class,
+            ],
+        ],
+        'enable_manual_acknowledgment' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Audit Log AMQP properties (remove if not needed)
+    |--------------------------------------------------------------------------
+    */
+    'audit_logs' => [
+        'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE'),
     ],
 ];
