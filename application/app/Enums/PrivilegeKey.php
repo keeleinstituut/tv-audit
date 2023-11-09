@@ -29,6 +29,7 @@ enum PrivilegeKey: string
     case ViewVendorTask = 'VIEW_VENDOR_TASK';
     case EditInstitution = 'EDIT_INSTITUTION';
     case EditInstitutionWorktime = 'EDIT_INSTITUTION_WORKTIME';
+    case EditInstitutionPriceRate = 'EDIT_INSTITUTION_PRICE_RATE';
     case CreateProject = 'CREATE_PROJECT';
     case ManageProject = 'MANAGE_PROJECT';
     case ReceiveAndManageProject = 'RECEIVE_AND_MANAGE_PROJECT';
@@ -36,6 +37,15 @@ enum PrivilegeKey: string
     case ViewInstitutionProjectList = 'VIEW_INSTITUTION_PROJECT_LIST';
     case ViewInstitutionProjectDetail = 'VIEW_INSTITUTION_PROJECT_DETAIL';
     case ChangeClient = 'CHANGE_CLIENT';
+    case ImportTranslationMemory = 'IMPORT_TM';
+    case CreateTranslationMemory = 'CREATE_TM';
+    case ExportTranslationMemory = 'EXPORT_TM';
+    case EditTranslationMemoryMetadata = 'EDIT_TM_METADATA';
+    case EditTranslationMemory = 'EDIT_TM';
+    case DeleteTranslationMemory = 'DELETE_TM';
+    case ViewTranslationMemory = 'VIEW_TM';
+    case ViewAuditLog = 'VIEW_AUDIT_LOG';
+    case ExportAuditLog = 'EXPORT_AUDIT_LOG';
 
     public static function values(): array
     {
