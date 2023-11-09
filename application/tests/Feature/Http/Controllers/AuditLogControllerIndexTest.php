@@ -8,6 +8,7 @@ use App\Models\EventRecord;
 use AuditLogClient\Enums\AuditLogEventType;
 use Faker\Generator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
@@ -20,7 +21,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
         $institutionId = Str::uuid()->toString();
         $eventRecords = EventRecord::factory()->state(['context_institution_id' => $institutionId])->count(100)->create();
         $queryParameters = static::buildQueryParameters();
-        $this->assertIndexReturnsExpectedIds($queryParameters, $eventRecords, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $eventRecords, $institutionId, true);
     }
 
     public function test_expected_records_returned_with_start_datetime_filter(): void
@@ -52,7 +53,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(startDatetime: $start);
-        $this->assertIndexReturnsExpectedIds($queryParameters, $recordsAfterOrEqualsStart, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $recordsAfterOrEqualsStart, $institutionId, true);
     }
 
     public function test_expected_records_returned_with_end_datetime_filter(): void
@@ -84,7 +85,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(endDatetime: $end);
-        $this->assertIndexReturnsExpectedIds($queryParameters, $recordsBeforeOrEqualsEnd, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $recordsBeforeOrEqualsEnd, $institutionId, true);
 
     }
 
@@ -101,7 +102,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(departmentId: $departmentId);
-        $this->assertIndexReturnsExpectedIds($queryParameters, $recordsBeforeOrEqualsEnd, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $recordsBeforeOrEqualsEnd, $institutionId, false);
     }
 
     public function test_expected_records_returned_with_event_type_filter(): void
@@ -127,7 +128,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(eventType: $logInEventType);
-        $this->assertIndexReturnsExpectedIds($queryParameters, $logInEvents, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $logInEvents, $institutionId, false);
     }
 
     /**
@@ -148,7 +149,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(text: $searchText);
-        $this->assertIndexReturnsExpectedIds($queryParameters, $matchingEventRecords, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $matchingEventRecords, $institutionId, true);
     }
 
     public function test_expected_records_returned_with_multiple_filters(): void
@@ -167,7 +168,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(departmentId: $departmentId, text: $pic);
-        $this->assertIndexReturnsExpectedIds($queryParameters, $matchingEventRecords, $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, $matchingEventRecords, $institutionId, false);
     }
 
     public function test_results_empty_when_no_match(): void
@@ -179,46 +180,81 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
             ->create();
 
         $queryParameters = static::buildQueryParameters(text: Str::random());
-        $this->assertIndexReturnsExpectedIds($queryParameters, new Collection(), $institutionId);
+        $this->assertIndexReturnsExpectedData($queryParameters, Collection::empty(), $institutionId, true);
     }
 
     /**
      * @param  Collection<EventRecord>  $expectedEventRecords
      */
-    private function assertIndexReturnsExpectedIds(array $queryParameters, Collection $expectedEventRecords, string $institutionId): void
+    private function assertIndexReturnsExpectedData(array $queryParameters, Collection $expectedEventRecords, string $institutionId, bool $expectTestQueriesInResults): void
     {
-        $expectedIds = static::sortAndPluckIds($expectedEventRecords);
+        $tolkevaravClaims = AuthHelpers::createTolkevaravClaims($institutionId, PrivilegeKey::ViewAuditLog);
 
         $this->assertPaginatedResponsesHaveIdsRecursively(
+            $tolkevaravClaims,
             action([EventRecordsController::class, 'index'], $queryParameters),
-            $expectedIds,
-            AuthHelpers::createAuthHeadersWithPrivilege($institutionId, PrivilegeKey::ViewAuditLog)
+            $expectedEventRecords->keyBy('id'),
+            Collection::empty(),
+            Collection::empty(),
+            $expectTestQueriesInResults,
+            AuthHelpers::createAuthHeaders($tolkevaravClaims)
         );
     }
 
-    private function assertPaginatedResponsesHaveIdsRecursively(string $url, array $remainingOrderedIds, array $headers): void
+    private function assertPaginatedResponsesHaveIdsRecursively(array $tolkevaravClaims, string $url, Collection $remainingExpectedRecords, Collection $foundExpectedRecords, Collection $testQueryRecords, bool $expectTestQueriesInResults, array $headers): void
     {
+        $currentRequestTraceId = Str::random();
+
         $response = $this
-            ->withHeaders($headers)
+            ->withHeaders([config('amqp.audit_logs.trace_id_http_header') => $currentRequestTraceId, ...$headers])
             ->getJson($url);
         $this->assertResponseAsExpectedInGeneral($response);
 
-        $responseIds = $response->json('data.*.id');
-        $this->assertGreaterThanOrEqual(count($responseIds), count($remainingOrderedIds));
+        $lastQueryEventRecord = EventRecord::where([
+            'trace_id' => $currentRequestTraceId,
+        ])->orderByDesc('happened_at')->firstOrFail();
 
-        if (count($remainingOrderedIds) == count($responseIds)) {
-            $this->assertArraysEqualIgnoringOrder($remainingOrderedIds, $responseIds);
+        $testQueryRecords->put($lastQueryEventRecord->id, $lastQueryEventRecord);
 
+        collect($response->json('data'))
+            ->each(function (array $actualRecord) use ($testQueryRecords, $foundExpectedRecords, $remainingExpectedRecords) {
+                /** @var EventRecord $expectedRecordModel */
+                $expectedRecordModel = $remainingExpectedRecords->first(fn (EventRecord $record) => $record->id === $actualRecord['id']);
+
+                if ($expectedRecordModel === null) {
+                    $this->assertTrue(
+                        $foundExpectedRecords->contains(fn (EventRecord $record) => $record->id === $actualRecord['id'])
+                        || $testQueryRecords->contains(fn (EventRecord $record) => $record->id === $actualRecord['id'])
+                    );
+
+                    return;
+                }
+
+                $expectedRecordData = Arr::only(
+                    $expectedRecordModel->toArray(),
+                    ['id', 'happened_at', 'acting_user_pic', 'acting_user_forename', 'acting_user_surname', 'acting_institution_user_id', 'event_type', 'event_parameters', 'trace_id', 'context_department_id', 'context_institution_id', 'failure_type']
+                );
+                $this->assertArraysEqualIgnoringOrder(
+                    $expectedRecordData,
+                    $actualRecord
+                );
+                $remainingExpectedRecords->forget($expectedRecordModel->id);
+                $foundExpectedRecords->put($expectedRecordModel->id, $expectedRecordModel);
+            });
+
+        if ($remainingExpectedRecords->isEmpty()) {
             return;
         }
 
         $this->assertIsString($response->json('links.next'));
-        $responseSpecificExpectedIds = collect($remainingOrderedIds)->take($response->json('meta.per_page'))->values()->all();
-        $this->assertEquals($responseIds, $responseSpecificExpectedIds);
 
         $this->assertPaginatedResponsesHaveIdsRecursively(
+            $tolkevaravClaims,
             $response->json('links.next'),
-            collect($remainingOrderedIds)->skip($response->json('meta.per_page'))->values()->all(),
+            $remainingExpectedRecords,
+            $testQueryRecords,
+            $foundExpectedRecords,
+            $expectTestQueriesInResults,
             $headers
         );
     }
@@ -246,8 +282,8 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
     /**
      * @param  Collection<EventRecord>  $eventRecords
      */
-    public static function sortAndPluckIds(Collection $eventRecords): array
+    public static function sort(Collection $eventRecords): Collection
     {
-        return $eventRecords->sortByDesc('happened_at')->values()->pluck('id')->all();
+        return $eventRecords->sortByDesc('happened_at')->values();
     }
 }

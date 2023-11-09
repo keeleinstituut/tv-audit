@@ -60,9 +60,16 @@ readonly class AuthHelpers
         return JWT::encode($payload, $privateKeyPem, 'RS256');
     }
 
-    public static function createAuthHeadersWithPrivilege(string $institutionId, PrivilegeKey $privilege): array
+    public static function createAuthHeaders(array $tolkevaravClaims): array
     {
-        $tolkevaravClaims = [
+        $accessToken = static::generateAccessToken($tolkevaravClaims);
+
+        return ['Authorization' => "Bearer $accessToken"];
+    }
+
+    public static function createTolkevaravClaims(string $institutionId, PrivilegeKey $privilege): array
+    {
+        return [
             'personalIdentificationCode' => app(Generator::class)->estonianPIC(),
             'userId' => fake()->uuid(),
             'institutionUserId' => fake()->uuid(),
@@ -73,12 +80,6 @@ readonly class AuthHelpers
                 'name' => fake()->company(),
             ],
             'privileges' => [$privilege->value],
-        ];
-
-        $accessToken = static::generateAccessToken($tolkevaravClaims);
-
-        return [
-            'Authorization' => "Bearer $accessToken",
         ];
     }
 }

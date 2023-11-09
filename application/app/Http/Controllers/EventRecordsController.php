@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\OpenApiHelpers as OAH;
 use App\Http\Requests\SearchAuditLogRequest;
 use App\Http\Resources\EventRecordResource;
+use App\Listeners\AuditLogEventListener;
 use App\Models\EventRecord;
 use App\Policies\EventRecordPolicy;
 use AuditLogClient\Enums\AuditLogEventType;
+use AuditLogClient\Services\AuditLogMessageBuilder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use League\Csv\ByteSequence;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Exception;
@@ -24,12 +27,17 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EventRecordsController extends Controller
 {
+    public function __construct(protected AuditLogEventListener $auditLogListener)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return ResourceCollection<EventRecordResource>
      *
      * @throws AuthorizationException
+     * @throws ValidationException
      */
     #[OA\Get(
         path: '/event-records',
@@ -76,6 +84,16 @@ class EventRecordsController extends Controller
     {
         $this->authorize('viewAny', EventRecord::class);
 
+        $this->auditLogListener->createEventRecord(
+            AuditLogMessageBuilder::makeUsingJWT()->toSearchLogsEvent(
+                $request->validated('start_datetime'),
+                $request->validated('end_datetime'),
+                $request->validated('event_type'),
+                $request->validated('department_id'),
+                $request->validated('text'),
+            )
+        );
+
         $paginatedQuery = $this->buildSearchQuery($request)->paginate()->appends($request->validated());
 
         return EventRecordResource::collection($paginatedQuery)->preserveQuery();
@@ -88,6 +106,7 @@ class EventRecordsController extends Controller
      * @throws CannotInsertRecord
      * @throws Exception
      * @throws InvalidArgument
+     * @throws ValidationException
      */
     #[OA\Get(
         path: '/export',
@@ -132,6 +151,17 @@ class EventRecordsController extends Controller
     public function export(SearchAuditLogRequest $request): StreamedResponse
     {
         $this->authorize('export', EventRecord::class);
+
+        $this->auditLogListener->createEventRecord(
+            AuditLogMessageBuilder::makeUsingJWT()->toExportLogsEvent(
+                $request->validated('start_datetime'),
+                $request->validated('end_datetime'),
+                $request->validated('event_type'),
+                $request->validated('department_id'),
+                $request->validated('text'),
+            )
+        );
+
         $eventRecords = $this->buildSearchQuery($request)->get();
 
         $csvDocument = Writer::createFromString()->setDelimiter(';');

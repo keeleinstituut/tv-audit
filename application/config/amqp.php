@@ -47,5 +47,6 @@ return [
     */
     'audit_logs' => [
         'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE'),
+        'trace_id_http_header' => env('AUDIT_LOG_TRACE_ID_HTTP_HEADER'),
     ],
 ];

@@ -12,6 +12,8 @@ use Tests\TestCase;
 
 class AuditLogControllerTestCase extends TestCase
 {
+    const TRACE_ID = '123-ABC';
+
     public static function buildQueryParameters(
         CarbonInterface $startDatetime = null,
         CarbonInterface $endDatetime = null,
