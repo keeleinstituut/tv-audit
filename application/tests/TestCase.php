@@ -2,40 +2,42 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Arr;
-use SyncTools\Traits\RefreshDatabaseWithCachedEntitySchema;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
-    use RefreshDatabaseWithCachedEntitySchema;
+    use RefreshDatabase;
 
-    protected function prepareAuthorizedRequest($accessToken): TestCase
+    public static function assertArrayHasSubsetIgnoringOrder(?array $expectedSubset, ?array $actual): void
     {
-        return $this->withHeader('Authorization', 'Bearer '.$accessToken);
-    }
-
-    public function assertArrayHasSubsetIgnoringOrder(?array $expectedSubset, ?array $actual): void
-    {
-        $this->assertNotNull($expectedSubset);
-        $this->assertNotNull($actual);
+        static::assertNotNull($expectedSubset);
+        static::assertNotNull($actual);
 
         $sortedDottedExpectedSubset = Arr::dot(Arr::sortRecursive($expectedSubset));
         $sortedDottedActualWholeArray = Arr::dot(Arr::sortRecursive($actual));
         $sortedDottedActualSubset = Arr::only($sortedDottedActualWholeArray, array_keys($sortedDottedExpectedSubset));
 
-        $this->assertArraysEqualIgnoringOrder($sortedDottedExpectedSubset, $sortedDottedActualSubset);
+        static::assertArraysEqualIgnoringOrder($sortedDottedExpectedSubset, $sortedDottedActualSubset);
     }
 
-    public function assertArraysEqualIgnoringOrder(?array $expected, ?array $actual): void
+    public static function assertArraysEqualIgnoringOrder(?array $expected, ?array $actual): void
     {
-        $this->assertNotNull($expected);
-        $this->assertNotNull($actual);
+        static::assertNotNull($expected);
+        static::assertNotNull($actual);
 
-        $this->assertEquals(
+        static::assertEquals(
             Arr::sortRecursive($expected),
             Arr::sortRecursive($actual)
         );
+    }
+
+    public static function areArraysEqualIgnoringOrder(?array $expected, ?array $actual): bool
+    {
+        return $expected !== null
+            && $actual !== null
+            && Arr::sortRecursive($expected) === Arr::sortRecursive($actual);
     }
 }
