@@ -73,8 +73,8 @@ class ObjectIdentityCreators
             'id' => fake()->uuid(),
             'institution' => [
                 'id' => fake()->uuid(),
-                'name' => fake()->company()
-            ]
+                'name' => fake()->company(),
+            ],
         ];
     }
 

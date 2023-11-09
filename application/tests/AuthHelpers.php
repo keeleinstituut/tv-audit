@@ -2,8 +2,11 @@
 
 namespace Tests;
 
+use App\Enums\PrivilegeKey;
+use Faker\Generator;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 readonly class AuthHelpers
 {
@@ -35,5 +38,47 @@ readonly class AuthHelpers
         return "-----BEGIN PRIVATE KEY-----\n".
             wordwrap($key, 64, "\n", true).
             "\n-----END PRIVATE KEY-----";
+    }
+
+    public static function generateAccessToken(array $tolkevaravPayload): string
+    {
+        $payload = collect([
+            'azp' => Str::of(config('keycloak.accepted_authorized_parties'))
+                ->explode(',')
+                ->first(),
+            'iss' => config('keycloak.base_url').'/realms/'.config('keycloak.realm'),
+            'tolkevarav' => $tolkevaravPayload,
+        ]);
+
+        return static::createJwt($payload->toArray());
+    }
+
+    public static function createJwt(array $payload): string
+    {
+        $privateKeyPem = static::getPrivateKey();
+
+        return JWT::encode($payload, $privateKeyPem, 'RS256');
+    }
+
+    public static function createAuthHeadersWithPrivilege(string $institutionId, PrivilegeKey $privilege): array
+    {
+        $tolkevaravClaims = [
+            'personalIdentificationCode' => app(Generator::class)->estonianPIC(),
+            'userId' => fake()->uuid(),
+            'institutionUserId' => fake()->uuid(),
+            'forename' => fake()->firstName(),
+            'surname' => fake()->lastName(),
+            'selectedInstitution' => [
+                'id' => $institutionId,
+                'name' => fake()->company(),
+            ],
+            'privileges' => [$privilege->value],
+        ];
+
+        $accessToken = static::generateAccessToken($tolkevaravClaims);
+
+        return [
+            'Authorization' => "Bearer $accessToken",
+        ];
     }
 }
