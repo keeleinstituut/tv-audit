@@ -6,6 +6,7 @@ use App\Enums\PrivilegeKey;
 use App\Models\EventRecord;
 use BadMethodCallException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use KeycloakAuthGuard\Middleware\EnsureJwtBelongsToServiceAccountWithSyncRole;
 
 readonly class EventRecordPolicy
@@ -35,7 +36,7 @@ readonly class EventRecordPolicy
      */
     public function create(mixed $user, string $jwt): bool
     {
-        return $this->syncRoleAuthChecker->isJwtAuthorized($jwt);
+        return $this->syncRoleAuthChecker->jwtHasRealmRole($jwt, Config::get('amqp.audit_logs.required_jwt_realm_role'));
     }
 
     /**
