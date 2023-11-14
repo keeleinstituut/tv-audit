@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "tv-audit.fullname" . }}-test-connection"
+  name: "{{ include "tv-audit-log.fullname" . }}-test-connection"
   labels:
-    {{- include "tv-audit.labels" . | nindent 4 }}
+    {{- include "tv-audit-log.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "tv-audit.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "tv-audit-log.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "tv-audit.fullname" . }}
+  name: {{ include "tv-audit-log.fullname" . }}
   labels:
-    {{- include "tv-audit.labels" . | nindent 4 }}
+    {{- include "tv-audit-log.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "tv-audit.selectorLabels" . | nindent 6 }}
+      {{- include "tv-audit-log.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "tv-audit.selectorLabels" . | nindent 8 }}
+        {{- include "tv-audit-log.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "tv-audit.serviceAccountName" . }}
+      serviceAccountName: {{ include "tv-audit-log.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

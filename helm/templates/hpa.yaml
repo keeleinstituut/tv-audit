@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "tv-audit.fullname" . }}
+  name: {{ include "tv-audit-log.fullname" . }}
   labels:
-    {{- include "tv-audit.labels" . | nindent 4 }}
+    {{- include "tv-audit-log.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "tv-audit.fullname" . }}
+    name: {{ include "tv-audit-log.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
