@@ -35,7 +35,7 @@ readonly class EventRecordPolicy
      */
     public function create(mixed $user, string $jwt): bool
     {
-        return $this->syncRoleAuthChecker->isJwtAuthorized($jwt);
+        return $this->syncRoleAuthChecker->jwtHasRealmRole($jwt, 'offline_access');
     }
 
     /**

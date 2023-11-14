@@ -37,7 +37,15 @@ return [
                 env('AUDIT_LOG_EVENTS_QUEUE') => IncomingAuditLogMessageEvent::class,
             ],
         ],
-        'enable_manual_acknowledgment' => true,
+        'enable_manual_acknowledgement' => true,
+    ],
+    'publisher' => [
+        'exchanges' => [
+            [
+                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE'),
+                'type' => 'topic'
+            ]
+        ]
     ],
 
     /*
