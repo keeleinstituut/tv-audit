@@ -12,6 +12,7 @@
 */
 
 use App\Http\Controllers\EventRecordsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/event-records')
     ->controller(EventRecordsController::class)

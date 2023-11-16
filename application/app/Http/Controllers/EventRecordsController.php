@@ -109,7 +109,7 @@ class EventRecordsController extends Controller
      * @throws ValidationException
      */
     #[OA\Get(
-        path: '/export',
+        path: '/event-records/export',
         parameters: [
             new OA\QueryParameter(
                 name: 'start_datetime',
