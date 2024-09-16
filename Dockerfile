@@ -21,8 +21,8 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
 
 COPY --chown=www-data:www-data ./application ${APP_ROOT}
 
-RUN chown -R www-data:www-data ${WEB_ROOT}/storage
-RUN chown -R www-data:www-data ${WEB_ROOT}/bootstrap/cache
+RUN chown -R www-data:www-data ${APP_ROOT}/storage
+RUN chown -R www-data:www-data ${APP_ROOT}/bootstrap/cache
 
 WORKDIR $APP_ROOT
 
