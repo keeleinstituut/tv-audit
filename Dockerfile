@@ -101,6 +101,7 @@ process_name=%(program_name)s
 command=php /app/artisan queue:work
 autostart=true
 autorestart=true
+user=www-data
 numprocs=1
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes = 0
@@ -112,6 +113,7 @@ process_name=%(program_name)s
 command=php /app/artisan schedule:work
 autostart=true
 autorestart=true
+user=www-data
 numprocs=1
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes = 0
@@ -123,6 +125,7 @@ process_name=%(program_name)s
 command=php /app/artisan amqp:consume audit-log-events  # see /application/config/amqp.php
 autostart=true
 autorestart=true
+user=www-data
 numprocs=1
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes = 0
@@ -136,6 +139,8 @@ set -e
 
 echo "Optimize for loading in runtime variables"
 php artisan optimize
+chown -R www-data:www-data ./bootstrap/cache
+chown -R www-data:www-data ./storage
 
 echo "Running migrations"
 php artisan migrate --force
