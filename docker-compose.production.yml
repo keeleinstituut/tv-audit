@@ -39,3 +39,6 @@ services:
       - SESSION_LIFETIME=120
       - MEMCACHED_HOST=127.0.0.1
       - L5_SWAGGER_GENERATE_ALWAYS=true
+      - AMQP_HOST=rabbitmq
+      - AUDIT_LOG_EVENTS_EXCHANGE=audit-log-events
+      - AUDIT_LOG_EVENTS_QUEUE=audit-log-events

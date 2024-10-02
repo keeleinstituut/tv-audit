@@ -25,16 +25,16 @@ return [
     'consumer' => [
         'queues' => [
             [
-                'queue' => env('AUDIT_LOG_EVENTS_QUEUE'),
+                'queue' => env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events'),
                 'bindings' => [
-                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE')],
+                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events')],
                 ],
             ],
         ],
         'events' => [
             'mode' => MessageEventFactory::MODE_QUEUE,
             'map' => [
-                env('AUDIT_LOG_EVENTS_QUEUE') => IncomingAuditLogMessageEvent::class,
+                env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events') => IncomingAuditLogMessageEvent::class,
             ],
         ],
         'enable_manual_acknowledgement' => true,
@@ -42,7 +42,7 @@ return [
     'publisher' => [
         'exchanges' => [
             [
-                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE'),
+                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events'),
                 'type' => 'topic'
             ]
         ]
