@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ff02c8fa7703eb3b365f1f15e222002e",
+    "content-hash": "b44591b7b0891e4b4da4078f705df4c5",
     "packages": [
         {
             "name": "brick/math",
@@ -1266,16 +1266,16 @@
         },
         {
             "name": "keeleinstituut/tv-common-laravel-amqp",
-            "version": "0.0.60",
+            "version": "0.0.61",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keeleinstituut/tv-common-laravel-amqp.git",
-                "reference": "39bee7fc03d199cb7e32fb3bf7e8b9a9672cfcaa"
+                "reference": "0d0150a506a24ee9d35a2559615374445284b60a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keeleinstituut/tv-common-laravel-amqp/zipball/39bee7fc03d199cb7e32fb3bf7e8b9a9672cfcaa",
-                "reference": "39bee7fc03d199cb7e32fb3bf7e8b9a9672cfcaa",
+                "url": "https://api.github.com/repos/keeleinstituut/tv-common-laravel-amqp/zipball/0d0150a506a24ee9d35a2559615374445284b60a",
+                "reference": "0d0150a506a24ee9d35a2559615374445284b60a",
                 "shasum": ""
             },
             "require": {
@@ -1324,10 +1324,10 @@
                 "rabbitmq"
             ],
             "support": {
-                "source": "https://github.com/keeleinstituut/tv-common-laravel-amqp/tree/0.0.60",
+                "source": "https://github.com/keeleinstituut/tv-common-laravel-amqp/tree/0.0.61",
                 "issues": "https://github.com/keeleinstituut/tv-common-laravel-amqp/issues"
             },
-            "time": "2024-10-02T13:26:20+00:00"
+            "time": "2024-10-22T14:14:36+00:00"
         },
         {
             "name": "keeleinstituut/tv-common-laravel-security",
@@ -9506,5 +9506,5 @@
         "php": "^8.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

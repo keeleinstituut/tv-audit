@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\AsUnicodeSafeArray;
 use AuditLogClient\Enums\AuditLogEventFailureType;
 use AuditLogClient\Enums\AuditLogEventType;
 use Eloquent;
@@ -66,7 +67,7 @@ class EventRecord extends Model
     protected $casts = [
         'event_type' => AuditLogEventType::class,
         'failure_type' => AuditLogEventFailureType::class,
-        'event_parameters' => 'array',
+        'event_parameters' => AsUnicodeSafeArray::class,
         'happened_at' => 'datetime',
     ];
 }
