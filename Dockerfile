@@ -157,6 +157,8 @@ EOF
 
 RUN chmod +x ${ENTRYPOINT}
 
+ENV PGSSLCERT /tmp/postgresql.crt
+
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
 EXPOSE 80
 
