@@ -28,7 +28,12 @@ class AsUnicodeSafeArray implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
+        if ($value === null) {
+            return null;
+        }
+
         $jsonString = json_encode($value);
+
         return Str::replace('\u0000', '', $jsonString);
     }
 }
