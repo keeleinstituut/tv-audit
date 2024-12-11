@@ -8,6 +8,7 @@ use AuditLogClient\DataTransferObjects\AuditLogMessage;
 use AuditLogClient\Services\AuditLogMessageValidationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use PhpAmqpLib\Wire\AMQPTable;
 
@@ -43,6 +44,9 @@ class AuditLogEventListener
         if (is_a($message, AuditLogMessage::class)) {
             $message = $message->toArray();
         }
+
+//        Log::debug($message);
+//        Log::debug(json_encode($message));
 
         $validator = $this->validationService->makeValidator($message);
         $validator->validate();
