@@ -39,7 +39,7 @@ class AuditLogControllerTestCase extends TestCase
             'Searching by project ext_id (FINISH_PROJECT)' => [
                 'PPA-2023-01-K-354',
                 [
-                    'event_type' => AuditLogEventType::FinishProject->value,
+                    'event_type' => AuditLogEventType::ApproveProject->value,
                     'event_parameters' => [
                         'project_id' => Str::uuid()->toString(),
                         'project_ext_id' => 'PPA-2023-01-K-354',

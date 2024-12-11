@@ -12,7 +12,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
 {
     public function test_finish_project_event()
     {
-        $message = static::createRandomizedMessageBuilder()->toFinishProjectEvent(
+        $message = static::createRandomizedMessageBuilder()->toApproveProjectEvent(
             Str::uuid()->toString(),
             Str::random()
         );

@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
                 new OA\Property(
                     property: 'event_type',
                     type: 'string',
-                    enum: [AuditLogEventType::FinishProject]
+                    enum: [AuditLogEventType::ApproveProject]
                 ),
                 new OA\Property(
                     property: 'event_parameters',

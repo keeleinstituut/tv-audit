@@ -74,7 +74,7 @@ class EventRecordFactory extends Factory
                 'assignment_id' => fake()->unique()->uuid(),
                 'assignment_ext_id' => fake()->unique()->regexify('[A-Z]{3}-\d{4}-\d{2}-[STK]-\d{3}-[A-Z]{4}-\d\/\d'),
             ],
-            AuditLogEventType::FinishProject => [
+            AuditLogEventType::ApproveProject => [
                 'project_id' => fake()->unique()->uuid(),
                 'project_ext_id' => fake()->unique()->regexify('[A-Z]{3}-\d{4}-\d{2}-[STK]-\d{3}'),
             ],
