@@ -59,6 +59,11 @@ class EventRecordsController extends Controller
                 schema: new OA\Schema(type: 'string', format: 'uuid', nullable: true)
             ),
             new OA\QueryParameter(
+                name: 'acting_user_pic',
+                description: 'Filter events to those which were done by specific institution user',
+                schema: new OA\Schema(type: 'string', nullable: true)
+            ),
+            new OA\QueryParameter(
                 name: 'event_type',
                 description: 'Filter events to those which are of the specified type',
                 schema: new OA\Schema(type: 'string', enum: AuditLogEventType::class, nullable: true)
@@ -91,6 +96,7 @@ class EventRecordsController extends Controller
                 $request->validated('event_type'),
                 $request->validated('department_id'),
                 $request->validated('text'),
+                $request->validated('acting_user_pic'),
             )
         );
 
@@ -127,6 +133,11 @@ class EventRecordsController extends Controller
                 schema: new OA\Schema(type: 'string', format: 'uuid', nullable: true)
             ),
             new OA\QueryParameter(
+                name: 'acting_user_pic',
+                description: 'Filter events to those which were done by specific institution user',
+                schema: new OA\Schema(type: 'string', format: 'uuid', nullable: true)
+            ),
+            new OA\QueryParameter(
                 name: 'event_type',
                 description: 'Filter events to those which are of the specified type',
                 schema: new OA\Schema(type: 'string', enum: AuditLogEventType::class, nullable: true)
@@ -159,6 +170,7 @@ class EventRecordsController extends Controller
                 $request->validated('event_type'),
                 $request->validated('department_id'),
                 $request->validated('text'),
+                $request->validated('acting_user_pic'),
             )
         );
 
@@ -214,6 +226,9 @@ class EventRecordsController extends Controller
     public function buildSearchQuery(SearchAuditLogRequest $request): Builder
     {
         return static::getBaseQuery()
+            ->when($request->validated('acting_user_pic'), function (Builder $query, string $pic): void {
+                $query->where('acting_user_pic', '=', $pic);
+            })
             ->when($request->validated('start_datetime'), function (Builder $query, string $start): void {
                 $query->where('happened_at', '>=', $start);
             })
