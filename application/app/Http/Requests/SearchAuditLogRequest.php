@@ -20,6 +20,7 @@ class SearchAuditLogRequest extends FormRequest
             'start_datetime' => 'date',
             'end_datetime' => 'date',
             'department_id' => 'uuid',
+            'acting_user_pic' => 'string',
             'event_type' => Rule::enum(AuditLogEventType::class),
             'text' => 'string',
         ];
