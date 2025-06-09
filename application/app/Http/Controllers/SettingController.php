@@ -15,9 +15,7 @@ class SettingController extends Controller
      */
     public function show(string $institutionId)
     {
-        $obj = Setting::firstOrNew([
-            'institution_id' => $institutionId,
-        ]);
+        $obj = Setting::getForInstitution($institutionId);
 
         $this->authorize('view', $obj);
 
@@ -33,16 +31,14 @@ class SettingController extends Controller
         $params = collect($request->validated());
 
         return DB::transaction(function () use ($params, $institutionId) {
-            $obj = Setting::firstOrNew([
-                'institution_id' => $institutionId,
-            ]);
+            $obj = Setting::getForInstitution($institutionId);
 
             $this->authorize('update', $obj);
 
             $obj->fill($params->toArray());
             $obj->save();
 
-            return $obj;
+            return new SettingResource($obj);
         });
     }
 
