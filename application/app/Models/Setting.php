@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+
+class Setting extends Model
+{
+    use HasUuids;
+    use HasFactory;
+
+    protected $fillable = [
+        'institution_id',
+        'event_record_retention_time',
+    ];
+
+    // Default values
+    protected $attributes = [
+        'event_record_retention_time' => 60,
+    ];
+
+    public function getEventRecordExpiryDateTime() {
+        $now = Carbon::now();
+        return $now->subMinutes($this->event_record_retention_time);
+    }
+}
