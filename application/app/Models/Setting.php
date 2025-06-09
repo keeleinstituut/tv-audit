@@ -26,4 +26,12 @@ class Setting extends Model
         $now = Carbon::now();
         return $now->subMinutes($this->event_record_retention_time);
     }
+
+    // Tries to find existing Setting for specific institution from database.
+    // If missing then returns new instance of Setting with default values.
+    public static function getForInstitution(string $institutionId) {
+        return Setting::firstOrNew([
+            'institution_id' => $institutionId,
+        ]);
+    }
 }

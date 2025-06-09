@@ -37,9 +37,15 @@ class PurgeExpiredEventRecords implements ShouldQueue
     {
         Log::info("Starting deletion of expired EventRecords");
 
-        $settings = Setting::all();
+        $institutionIds = EventRecord::getModel()
+            ->select('context_institution_id')
+            ->distinct()
+            ->get()
+            ->pluck('context_institution_id');
 
-        $settings->each(function ($setting) {
+        $institutionIds->each(function ($institutionId) {
+            $setting = Setting::getForInstitution($institutionId);
+
             Log::info("Purging records for Institution with ID $setting->institution_id");
             
             Log::info($setting->event_record_retention_time);
