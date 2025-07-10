@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\IncomingAuditLogMessageEvent;
+use App\Events\TestAuditLogEvent;
 use SyncTools\Events\MessageEventFactory;
 
 return [
@@ -30,11 +31,16 @@ return [
                     ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events')],
                 ],
             ],
+            [
+                'queue' => 'audit-log-events2',
+                'bindings' => [],
+            ],
         ],
         'events' => [
             'mode' => MessageEventFactory::MODE_QUEUE,
             'map' => [
                 env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events') => IncomingAuditLogMessageEvent::class,
+                'audit-log-events2' => TestAuditLogEvent::class,
             ],
         ],
         'enable_manual_acknowledgement' => true,
