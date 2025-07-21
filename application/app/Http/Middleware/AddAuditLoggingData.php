@@ -18,6 +18,13 @@ class AddAuditLoggingData
     {
         $response = $next($request);
 
+        // If no controller responds to request then return the response
+        if (Route::currentRouteAction() == null) {
+            return $response;
+        }
+
+        // Otherwise if there's a specific controller responding then
+        // ensure that route has a "name" attribute specified.
         $routeName = Route::currentRouteName();
 
         if ($routeName == null) {

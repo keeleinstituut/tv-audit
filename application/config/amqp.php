@@ -26,21 +26,16 @@ return [
     'consumer' => [
         'queues' => [
             [
-                'queue' => env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events'),
+                'queue' => env('AUDIT_LOG_EVENTS_QUEUE', 'tv-audit.event-record'),
                 'bindings' => [
-                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events')],
+                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'tv-audit.event-record')],
                 ],
-            ],
-            [
-                'queue' => 'audit-log-events2',
-                'bindings' => [],
             ],
         ],
         'events' => [
             'mode' => MessageEventFactory::MODE_QUEUE,
             'map' => [
-                env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events') => IncomingAuditLogMessageEvent::class,
-                'audit-log-events2' => TestAuditLogEvent::class,
+                env('AUDIT_LOG_EVENTS_QUEUE', 'tv-audit.event-record') => IncomingAuditLogMessageEvent::class,
             ],
         ],
         'enable_manual_acknowledgement' => true,
@@ -48,7 +43,7 @@ return [
     'publisher' => [
         'exchanges' => [
             [
-                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events'),
+                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'tv-audit.event-record'),
                 'type' => 'topic'
             ]
         ]

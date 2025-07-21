@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event_record2s', function (Blueprint $table) {
+        Schema::create('event_records', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
             $table->timestampTz('happened_at', 3)->nullable();
@@ -43,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('event_record2s');
+        Schema::dropIfExists('event_records');
     }
 };

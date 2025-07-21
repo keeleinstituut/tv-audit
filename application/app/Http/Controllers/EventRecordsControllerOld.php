@@ -25,7 +25,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class EventRecordsController extends Controller
+class EventRecordsControllerOld extends Controller
 {
     public function __construct(protected AuditLogEventListener $auditLogListener)
     {
@@ -40,7 +40,7 @@ class EventRecordsController extends Controller
      * @throws ValidationException
      */
     #[OA\Get(
-        path: '/event-records',
+        path: '/event-records-old',
         summary: 'List and optionally filter audit log event records belonging to the current institution (inferred from JWT)',
         parameters: [
             new OA\QueryParameter(
@@ -115,7 +115,7 @@ class EventRecordsController extends Controller
      * @throws ValidationException
      */
     #[OA\Get(
-        path: '/event-records/export',
+        path: '/event-records-old/export',
         parameters: [
             new OA\QueryParameter(
                 name: 'start_datetime',
