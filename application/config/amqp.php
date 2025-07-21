@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\IncomingAuditLogMessageEvent;
+use App\Events\TestAuditLogEvent;
 use SyncTools\Events\MessageEventFactory;
 
 return [
@@ -25,16 +26,16 @@ return [
     'consumer' => [
         'queues' => [
             [
-                'queue' => env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events'),
+                'queue' => env('AUDIT_LOG_EVENTS_QUEUE', 'tv-audit.event-record'),
                 'bindings' => [
-                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events')],
+                    ['exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'tv-audit.event-record')],
                 ],
             ],
         ],
         'events' => [
             'mode' => MessageEventFactory::MODE_QUEUE,
             'map' => [
-                env('AUDIT_LOG_EVENTS_QUEUE', 'audit-log-events') => IncomingAuditLogMessageEvent::class,
+                env('AUDIT_LOG_EVENTS_QUEUE', 'tv-audit.event-record') => IncomingAuditLogMessageEvent::class,
             ],
         ],
         'enable_manual_acknowledgement' => true,
@@ -42,7 +43,7 @@ return [
     'publisher' => [
         'exchanges' => [
             [
-                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'audit-log-events'),
+                'exchange' => env('AUDIT_LOG_EVENTS_EXCHANGE', 'tv-audit.event-record'),
                 'type' => 'topic'
             ]
         ]
