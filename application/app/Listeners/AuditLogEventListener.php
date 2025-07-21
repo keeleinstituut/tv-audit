@@ -2,68 +2,87 @@
 
 namespace App\Listeners;
 
+use DB;
 use App\Events\IncomingAuditLogMessageEvent;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Validator;
 use App\Models\EventRecord;
-use AuditLogClient\DataTransferObjects\AuditLogMessage;
-use AuditLogClient\Services\AuditLogMessageValidationService;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
-use PhpAmqpLib\Wire\AMQPTable;
 
 class AuditLogEventListener
 {
     /**
      * Create the event listener.
      */
-    public function __construct(private readonly AuditLogMessageValidationService $validationService)
+    public function __construct()
     {
+        //
     }
 
     /**
      * Handle the event.
-     *
-     * @throws ValidationException
-     * @throws AuthorizationException
      */
-    public function handle(IncomingAuditLogMessageEvent $amqpEvent): void
+    public function handle(IncomingAuditLogMessageEvent $event): void
     {
-        static::authorize($amqpEvent);
+        dump($event->getBody());
 
-        $this->createEventRecord($amqpEvent->getBody());
+        DB::transaction(function () use ($event) {
+            $body = $event->getBody();
 
-        $this->ackMessage($amqpEvent);
-    }
+            $data = [
+                'happened_at' => data_get($body, 'general.happened_at'),
 
-    /**
-     * @throws ValidationException
-     */
-    public function createEventRecord(AuditLogMessage|array $message): void
-    {
-        if (is_a($message, AuditLogMessage::class)) {
-            $message = $message->toArray();
-        }
+                'actor_pic' => data_get($body, 'general.actor_pic'),
+                'actor_name' => data_get($body, 'general.actor_name'),
+                'actor_session' => data_get($body, 'general.actor_session'),
+                'actor_department_id' => data_get($body, 'general.actor_department_id'),
+                'actor_institution_id' => data_get($body, 'general.actor_institution_id'),
+                'actor_institution_user_id' => data_get($body, 'general.actor_institution_user_id'),
 
-//        Log::debug($message);
-//        Log::debug(json_encode($message));
+                'action' => data_get($body, 'general.action'),
+                'web_path' => data_get($body, 'general.web_path'),
 
-        $validator = $this->validationService->makeValidator($message);
-        $validator->validate();
+                'path' => data_get($body, 'request.path'),
+                'request_method' => data_get($body, 'request.method'),
+                'request_query' => data_get($body, 'request.query'),
+                'request_body' => data_get($body, 'request.body'),
 
-        EventRecord::create($validator->validated());
-    }
+                // 'response_content_type' => data_get($body, 'response.headers.content-type'),
+                // 'response_body' => data_get($body, 'response.body'),
+                'response_status_code' => data_get($body, 'response.status_code'),
+            ];
 
-    public function ackMessage(IncomingAuditLogMessageEvent $amqpEvent): void
-    {
-        $amqpEvent->message->ack();
-    }
+            // if ($data['response_content_type'] == 'application/json') {
+            //     $data['response_body'] = json_decode($data['response_body'], true);
+            // }
 
-    /** @throws AuthorizationException */
-    public static function authorize(IncomingAuditLogMessageEvent $amqpEvent): void
-    {
-        /** @var AMQPTable $applicationHeaders */
-        $applicationHeaders = $amqpEvent->message->get('application_headers');
-        Gate::forUser(null)->authorize('create', [EventRecord::class, $applicationHeaders['jwt']]);
+            $validator = Validator::make($data, [
+                'happened_at' => 'required|date',
+
+                'actor_pic' => 'required|string',
+                'actor_name' => 'required|string',
+                'actor_session' => 'required|string',
+                'actor_department_id' => 'required|string',
+                'actor_institution_id' => 'required|string',
+                'actor_institution_user_id' => 'required|string',
+
+                'action' => 'required|string',
+                'web_path' => 'required|string',
+
+                'path' => 'required|string',
+                'request_method' => 'required|string',
+                'request_query' => 'nullable|array',
+                'request_body' => 'nullable|array',
+
+                'response_status_code' => 'required|integer',
+            ]);
+
+            $record = new EventRecord();
+            $record->fill($validator->validated());
+            $record->save();
+
+            $event->message->ack();
+        });
+
     }
 }

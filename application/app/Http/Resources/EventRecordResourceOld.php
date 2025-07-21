@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources;
 
-use OpenApi\Attributes as OA;
 use App\Http\OpenApiHelpers as OAH;
 use App\Models\EventRecord;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use OpenApi\Attributes as OA;
 
 /**
  * @mixin EventRecord
@@ -44,7 +44,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
         new OA\Schema(ref: OAH\Schemas\EventRecords\FailedAttemptEventRecordSchema::class),
     ]
 )]
-class EventRecordResource extends JsonResource
+class EventRecordResourceOld extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -53,6 +53,19 @@ class EventRecordResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return $this->only(
+            'id',
+            'happened_at',
+            'acting_user_pic',
+            'acting_user_forename',
+            'acting_user_surname',
+            'acting_institution_user_id',
+            'event_type',
+            'event_parameters',
+            'trace_id',
+            'context_department_id',
+            'context_institution_id',
+            'failure_type',
+        );
     }
 }

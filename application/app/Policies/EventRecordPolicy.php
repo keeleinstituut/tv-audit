@@ -115,6 +115,6 @@ class EventScope implements IScope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where('context_institution_id', Auth::user()->institutionId);
+        $builder->where('actor_institution_id', Auth::user()->institutionId);
     }
 }
