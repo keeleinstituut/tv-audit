@@ -19,7 +19,7 @@ class Setting extends Model
 
     // Default values
     protected $attributes = [
-        'event_record_retention_time' => 60,
+        'event_record_retention_time' => 43200,
     ];
 
     public function getEventRecordExpiryDateTime() {
