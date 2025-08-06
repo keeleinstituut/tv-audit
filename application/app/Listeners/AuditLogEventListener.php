@@ -62,7 +62,7 @@ class AuditLogEventListener
                 'actor_pic' => 'required|string',
                 'actor_name' => 'required|string',
                 'actor_session' => 'required|string',
-                'actor_department_id' => 'required|string',
+                'actor_department_id' => 'nullable|string',
                 'actor_institution_id' => 'required|string',
                 'actor_institution_user_id' => 'required|string',
 
