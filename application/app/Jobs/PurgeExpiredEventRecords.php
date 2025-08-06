@@ -38,10 +38,10 @@ class PurgeExpiredEventRecords implements ShouldQueue
         Log::info("Starting deletion of expired EventRecords");
 
         $institutionIds = EventRecord::getModel()
-            ->select('context_institution_id')
+            ->select('actor_institution_id')
             ->distinct()
             ->get()
-            ->pluck('context_institution_id');
+            ->pluck('actor_institution_id');
 
         $institutionIds->each(function ($institutionId) {
             $setting = Setting::getForInstitution($institutionId);
@@ -53,7 +53,7 @@ class PurgeExpiredEventRecords implements ShouldQueue
             Log::info("Deleting records older than " . $setting->getEventRecordExpiryDateTime());
 
             $eventRecordsQuery = EventRecord::getModel()
-                ->where('context_institution_id', $setting->institution_id);
+                ->where('actor_institution_id', $setting->institution_id);
 
             $expiredEventRecordsQuery = $eventRecordsQuery->clone()
                 ->where('happened_at', '<', $setting->getEventRecordExpiryDateTime());
