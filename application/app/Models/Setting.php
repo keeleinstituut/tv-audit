@@ -12,6 +12,8 @@ class Setting extends Model
     use HasUuids;
     use HasFactory;
 
+    public const MINIMUM_EVENT_RECORD_RETENTION_TIME = 365 * 2; // 2 years in days
+
     protected $fillable = [
         'institution_id',
         'event_record_retention_time',
@@ -19,12 +21,12 @@ class Setting extends Model
 
     // Default values
     protected $attributes = [
-        'event_record_retention_time' => 43200,
+        'event_record_retention_time' => Setting::MINIMUM_EVENT_RECORD_RETENTION_TIME,
     ];
 
     public function getEventRecordExpiryDateTime() {
         $now = Carbon::now();
-        return $now->subMinutes($this->event_record_retention_time);
+        return $now->subDays($this->event_record_retention_time);
     }
 
     // Tries to find existing Setting for specific institution from database.

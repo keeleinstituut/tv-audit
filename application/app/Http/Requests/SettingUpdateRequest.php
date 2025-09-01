@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Setting;
 
 class SettingUpdateRequest extends FormRequest
 {
@@ -15,7 +16,7 @@ class SettingUpdateRequest extends FormRequest
     {
         return [
             // 'event_record_retention_time' => 'integer|min:60',
-            'event_record_retention_time' => 'integer|min:1',
+            'event_record_retention_time' => 'integer|min:' . Setting::MINIMUM_EVENT_RECORD_RETENTION_TIME,
         ];
     }
 }
