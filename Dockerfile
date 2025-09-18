@@ -134,7 +134,7 @@ stderr_logfile_maxbytes=0
 
 [eventlistener:processes]
 command=sh -c "printf 'READY\n' && while read line; do kill -SIGQUIT $PPID; done < /dev/stdin"
-events=PROCESS_STATE_STOPPED,PROCESS_STATE_EXITED,PROCESS_STATE_FATAL
+events=PROCESS_STATE_STOPPED,PROCESS_STATE_EXITED,PROCESS_STATE_FATAL,PROCESS_STATE_BACKOFF
 
 EOF
 
