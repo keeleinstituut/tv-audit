@@ -79,7 +79,7 @@ command=php-fpm
 process_name=%(program_name)s
 numprocs=1
 autostart=true
-autorestart=true
+autorestart=false
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes = 0
 stderr_logfile=/dev/stderr
@@ -90,7 +90,7 @@ command=nginx -g 'daemon off;'
 process_name=%(program_name)s
 numprocs=1
 autostart=true
-autorestart=true
+autorestart=false
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes = 0
 stderr_logfile=/dev/stderr
@@ -100,7 +100,7 @@ stderr_logfile_maxbytes=0
 process_name=%(program_name)s
 command=php /app/artisan queue:work
 autostart=true
-autorestart=true
+autorestart=false
 user=www-data
 numprocs=1
 stdout_logfile=/dev/stdout
@@ -112,7 +112,7 @@ stderr_logfile_maxbytes=0
 process_name=%(program_name)s
 command=php /app/artisan schedule:work
 autostart=true
-autorestart=true
+autorestart=false
 user=www-data
 numprocs=1
 stdout_logfile=/dev/stdout
@@ -124,13 +124,18 @@ stderr_logfile_maxbytes=0
 process_name=%(program_name)s
 command=php /app/artisan amqp:consume audit-log-events  # see /application/config/amqp.php
 autostart=true
-autorestart=true
+autorestart=false
 user=www-data
 numprocs=1
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes = 0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
+
+[eventlistener:processes]
+command=sh -c "printf 'READY\n' && while read line; do kill -SIGQUIT $PPID; done < /dev/stdin"
+events=PROCESS_STATE_STOPPED,PROCESS_STATE_EXITED,PROCESS_STATE_FATAL
+
 EOF
 
 RUN <<EOF cat > ${ENTRYPOINT}
