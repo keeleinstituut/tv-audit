@@ -12,7 +12,8 @@ class Setting extends Model
     use HasUuids;
     use HasFactory;
 
-    public const MINIMUM_EVENT_RECORD_RETENTION_TIME = 365 * 2; // 2 years in days
+    public const MIN_EVENT_RECORD_RETENTION_TIME = 365 * 2; // 2 years in days
+    public const MAX_EVENT_RECORD_RETENTION_TIME = 365 * 10; // 2 years in days
 
     protected $fillable = [
         'institution_id',
@@ -21,7 +22,7 @@ class Setting extends Model
 
     // Default values
     protected $attributes = [
-        'event_record_retention_time' => Setting::MINIMUM_EVENT_RECORD_RETENTION_TIME,
+        'event_record_retention_time' => Setting::MIN_EVENT_RECORD_RETENTION_TIME,
     ];
 
     public function getEventRecordExpiryDateTime() {
