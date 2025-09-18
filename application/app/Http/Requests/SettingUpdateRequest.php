@@ -16,7 +16,7 @@ class SettingUpdateRequest extends FormRequest
     {
         return [
             // 'event_record_retention_time' => 'integer|min:60',
-            'event_record_retention_time' => 'integer|min:' . Setting::MINIMUM_EVENT_RECORD_RETENTION_TIME,
+            'event_record_retention_time' => 'integer|min:' . Setting::MIN_EVENT_RECORD_RETENTION_TIME . '|max:' . Setting::MAX_EVENT_RECORD_RETENTION_TIME,
         ];
     }
 }
