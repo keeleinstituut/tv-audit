@@ -67,7 +67,7 @@ class AuditLogEventListener
                 'actor_institution_user_id' => 'required|string',
 
                 'action' => 'required|string',
-                'web_path' => 'required|string',
+                'web_path' => 'string',
 
                 'path' => 'required|string',
                 'request_method' => 'required|string',
