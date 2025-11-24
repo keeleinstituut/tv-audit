@@ -147,6 +147,9 @@ php artisan optimize
 chown -R www-data:www-data ./bootstrap/cache
 chown -R www-data:www-data ./storage
 
+echo "Consolidating schemas to public (if needed)"
+php artisan db:consolidate-schemas
+
 echo "Running migrations"
 php artisan migrate --force
 
