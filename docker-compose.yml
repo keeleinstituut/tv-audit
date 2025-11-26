@@ -7,16 +7,11 @@ services:
     ports:
       - ${DB_PORT}:5432
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=app
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
     volumes:
-      - ./dev-db-init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql
 
-  # rabbitmq:
-  #   image: rabbitmq:latest
-  #   ports:
-  #     - ${amqp_port}:5672
-  #   environment:
-  #     - rabbitmq_default_user=guest
-  #     - rabbitmq_default_pass=guest
+volumes:
+  postgres_data:
