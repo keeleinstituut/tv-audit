@@ -13,10 +13,10 @@ services:
     volumes:
       - ./dev-db-init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  # rabbitmq:
-  #   image: rabbitmq:latest
-  #   ports:
-  #     - ${amqp_port}:5672
-  #   environment:
-  #     - rabbitmq_default_user=guest
-  #     - rabbitmq_default_pass=guest
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - ${AMQP_PORT}:5672
+    environment:
+      - rabbitmq_default_user=guest
+      - rabbitmq_default_pass=guest

@@ -71,11 +71,11 @@ return new class extends Migration
 
         DB::statement(
         /** @lang PostgreSQL */
-            'CREATE OR REPLACE FUNCTION count_jsonb_object_keys(json_value JSONB)
+            'CREATE OR REPLACE FUNCTION count_jsonb_object_keys(json_val JSONB)
             RETURNS BIGINT
             LANGUAGE sql IMMUTABLE
             AS $$
-                SELECT count(*) FROM (SELECT jsonb_object_keys(json_value)) object_keys
+                SELECT count(*) FROM (SELECT jsonb_object_keys(json_val)) object_keys
             $$;'
         );
 
