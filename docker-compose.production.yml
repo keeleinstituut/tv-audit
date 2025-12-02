@@ -26,11 +26,12 @@ services:
       - DB_USERNAME=user
       - DB_PASSWORD=pass
       - PG_APP_USERNAME=app_user
+      - PG_APP_PASSWORD=pass
       - PG_APP_SCHEMA=application
       - PG_SYNC_USERNAME=sync_user
+      - PG_SYNC_PASSWORD=pass
       - PG_SYNC_SCHEMA=entity_cache
       - PG_SYNC_CONNECTION_NAME=pgsql_sync
-      - PG_ADMIN_CONNECTION_NAME=pgsql_admin
       - BROADCAST_DRIVER=log
       - CACHE_DRIVER=file
       - FILESYSTEM_DISK=local
