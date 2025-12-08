@@ -7,6 +7,7 @@ use AuditLogClient\Enums\AuditLogEventType;
 use AuditLogClient\Services\AuditLogMessageBuilder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
 {
@@ -148,7 +149,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
         $this->assertEventIsRecorded($message);
     }
 
-    /** @dataProvider provideAllObjectTypes */
+    #[DataProvider('provideAllObjectTypes')]
     public function test_remove_object_with_all_object_types(AuditLogEventObjectType $objectType)
     {
         $message = static::createRandomizedMessageBuilder()->toRemoveObjectEvent(
@@ -159,7 +160,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
         $this->assertEventIsRecorded($message);
     }
 
-    /** @dataProvider provideAllObjectTypes */
+    #[DataProvider('provideAllObjectTypes')]
     public function test_create_object_with_all_object_types(AuditLogEventObjectType $objectType)
     {
         $message = static::createRandomizedMessageBuilder()->toCreateObjectEvent(
@@ -171,7 +172,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
         $this->assertEventIsRecorded($message);
     }
 
-    /** @dataProvider provideAllObjectTypes */
+    #[DataProvider('provideAllObjectTypes')]
     public function test_modify_object_with_all_object_types(AuditLogEventObjectType $objectType)
     {
         $message = static::createRandomizedMessageBuilder()->toModifyObjectEvent(
@@ -224,7 +225,7 @@ class AuditLogEventListenerSuccessTest extends AuditLogEventListenerBaseTestCase
             ->all();
     }
 
-    /** @dataProvider provideEventTypesAndRandomEventParameters */
+    #[DataProvider('provideEventTypesAndRandomEventParameters')]
     public function test_events_with_unprocessable_entity_failure(AuditLogEventType $eventType, ?array $eventParameters)
     {
         $message = static::createRandomizedMessageBuilder()->toEventWithUnprocessableEntityFailure($eventType, $eventParameters);
