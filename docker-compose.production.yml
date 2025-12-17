@@ -25,6 +25,8 @@ services:
       - DB_DATABASE=app
       - DB_USERNAME=user
       - DB_PASSWORD=pass
+      - PG_APP_SCHEMA=application
+      - PG_SYNC_SCHEMA=entity_cache
       - BROADCAST_DRIVER=log
       - CACHE_DRIVER=file
       - FILESYSTEM_DISK=local

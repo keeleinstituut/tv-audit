@@ -11,7 +11,12 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - ./dev-db-init.sql:/docker-entrypoint-initdb.d/init.sql
 
-volumes:
-  postgres_data:
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - ${AMQP_PORT}:5672
+    environment:
+      - rabbitmq_default_user=guest
+      - rabbitmq_default_pass=guest
