@@ -23,8 +23,8 @@ WORKDIR $APP_ROOT
 RUN rm -rf ${WEB_ROOT} && \
         ln -s ${APP_ROOT}/public ${WEB_ROOT}
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction && \
-    composer clear-cache && \
+RUN su www-data -s /bin/sh -c "composer install --no-dev --optimize-autoloader --no-interaction" && \
+    su www-data -s /bin/sh -c "composer clear-cache" && \
     rm -f /usr/bin/composer
 
 RUN apk add --no-cache nginx supervisor curl
@@ -137,23 +137,25 @@ RUN <<EOF cat > ${ENTRYPOINT}
 #!/bin/sh
 set -e
 
-echo "Optimize for loading in runtime variables"
-php artisan optimize
-
+# Fix permissions (run as root)
 chown -R www-data:www-data ./bootstrap/cache
 chown -R www-data:www-data ./storage
 
+# Run artisan commands as www-data user
+echo "Optimize for loading in runtime variables"
+su www-data -s /bin/sh -c "php artisan optimize"
+
 echo "Consolidating schemas to public (if needed)"
-php artisan db:consolidate-schemas
+su www-data -s /bin/sh -c "php artisan db:consolidate-schemas"
 
 echo "Running migrations"
-php artisan migrate --force
+su www-data -s /bin/sh -c "php artisan migrate --force"
 
 echo "Setup AMQP queues"
-php artisan amqp:setup
+su www-data -s /bin/sh -c "php artisan amqp:setup"
 
 echo "Generating OpenAPI document"
-php artisan l5-swagger:generate
+su www-data -s /bin/sh -c "php artisan l5-swagger:generate"
 
 echo "Start application processes using supervisord..."
 exec "\$@"
