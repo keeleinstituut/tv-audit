@@ -9,31 +9,25 @@ ENV APP_ROOT /app
 ENV WEB_ROOT /var/www/html
 ENV ENTRYPOINT /entrypoint.sh
 
-RUN apk add libpq-dev libsodium-dev linux-headers
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
-        docker-php-ext-install pgsql \
-                                pdo \
-                                pdo_pgsql \
-                                sodium \
-                                pcntl \
-                                sockets \
-                                exif
+RUN apk add --no-cache libpq libpq-dev libsodium libsodium-dev linux-headers && \
+    docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
+    docker-php-ext-install pgsql pdo pdo_pgsql sodium pcntl sockets exif && \
+    apk del libpq-dev libsodium-dev linux-headers
 
 COPY --chown=www-data:www-data ./application ${APP_ROOT}
 
-RUN chown -R www-data:www-data ${APP_ROOT}/storage
-RUN chown -R www-data:www-data ${APP_ROOT}/bootstrap/cache
+RUN chown -R www-data:www-data ${APP_ROOT}/storage ${APP_ROOT}/bootstrap/cache
 
 WORKDIR $APP_ROOT
 
 RUN rm -rf ${WEB_ROOT} && \
         ln -s ${APP_ROOT}/public ${WEB_ROOT}
 
-RUN composer install
+RUN composer install --no-dev --optimize-autoloader --no-interaction && \
+    composer clear-cache && \
+    rm -f /usr/bin/composer
 
-RUN apk add nginx \
-                supervisor \
-                curl
+RUN apk add --no-cache nginx supervisor curl
 
 RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisord.conf && \
     sed -i 's/pm.max_children = 5/pm.max_children = 50/g' /usr/local/etc/php-fpm.d/www.conf && \
