@@ -9,33 +9,27 @@ ENV APP_ROOT /app
 ENV WEB_ROOT /var/www/html
 ENV ENTRYPOINT /entrypoint.sh
 
-RUN apk add libpq-dev libsodium-dev linux-headers
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
-        docker-php-ext-install pgsql \
-                                pdo \
-                                pdo_pgsql \
-                                sodium \
-                                pcntl \
-                                sockets \
-                                exif
+RUN apk add --no-cache libpq libpq-dev libsodium libsodium-dev linux-headers && \
+    docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
+    docker-php-ext-install pgsql pdo pdo_pgsql sodium pcntl sockets exif && \
+    apk del libpq-dev libsodium-dev linux-headers
 
 COPY --chown=www-data:www-data ./application ${APP_ROOT}
 
-RUN chown -R www-data:www-data ${APP_ROOT}/storage
-RUN chown -R www-data:www-data ${APP_ROOT}/bootstrap/cache
+RUN chown -R www-data:www-data ${APP_ROOT}/storage ${APP_ROOT}/bootstrap/cache
 
 WORKDIR $APP_ROOT
 
 RUN rm -rf ${WEB_ROOT} && \
         ln -s ${APP_ROOT}/public ${WEB_ROOT}
 
-RUN composer install
+RUN su www-data -s /bin/sh -c "composer install --no-dev --optimize-autoloader --no-interaction" && \
+    su www-data -s /bin/sh -c "composer clear-cache" && \
+    rm -f /usr/bin/composer
 
-RUN apk add nginx \
-                supervisor \
-                curl
+RUN apk add --no-cache nginx supervisor curl
 
-RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisord.conf && \
+RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true\nuser=root/' /etc/supervisord.conf && \
     sed -i 's/pm.max_children = 5/pm.max_children = 50/g' /usr/local/etc/php-fpm.d/www.conf && \
     sed -i 's/;pm.max_requests = 500/pm.max_requests = 200/g' /usr/local/etc/php-fpm.d/www.conf && \
     sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /usr/local/etc/php-fpm.d/www.conf && \
@@ -143,23 +137,25 @@ RUN <<EOF cat > ${ENTRYPOINT}
 #!/bin/sh
 set -e
 
-echo "Optimize for loading in runtime variables"
-php artisan optimize
-
+# Fix permissions (run as root)
 chown -R www-data:www-data ./bootstrap/cache
 chown -R www-data:www-data ./storage
 
+# Run artisan commands as www-data user
+echo "Optimize for loading in runtime variables"
+su www-data -s /bin/sh -c "php artisan optimize"
+
 echo "Consolidating schemas to public (if needed)"
-php artisan db:consolidate-schemas
+su www-data -s /bin/sh -c "php artisan db:consolidate-schemas"
 
 echo "Running migrations"
-php artisan migrate --force
+su www-data -s /bin/sh -c "php artisan migrate --force"
 
 echo "Setup AMQP queues"
-php artisan amqp:setup
+su www-data -s /bin/sh -c "php artisan amqp:setup"
 
 echo "Generating OpenAPI document"
-php artisan l5-swagger:generate
+su www-data -s /bin/sh -c "php artisan l5-swagger:generate"
 
 echo "Start application processes using supervisord..."
 exec "\$@"
