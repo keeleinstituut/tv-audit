@@ -7,7 +7,7 @@ services:
       - postgres
       - rabbitmq
     ports:
-      - 8000:80
+      - 8004:80
     environment:
       - APP_NAME=tv-audit
       - APP_ENV=local
@@ -36,3 +36,6 @@ services:
       - AMQP_HOST=rabbitmq
       - AUDIT_LOG_EVENTS_EXCHANGE=audit-log-events
       - AUDIT_LOG_EVENTS_QUEUE=audit-log-events
+      - KEYCLOAK_BASE_URL=http://host.docker.internal:8180
+      - KEYCLOAK_REALM=tolkevarav-dev
+      - ACCEPTED_AUTHORIZED_PARTIES=web
