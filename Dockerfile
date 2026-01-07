@@ -26,8 +26,7 @@ RUN chown -R root:root ${APP_ROOT} && \
     chown -R www-data:www-data ${APP_ROOT}/storage ${APP_ROOT}/bootstrap/cache && \
     find ${APP_ROOT} -type f -exec chmod 644 {} \; && \
     find ${APP_ROOT} -type d -exec chmod 755 {} \; && \
-    chmod -R 775 ${APP_ROOT}/storage ${APP_ROOT}/bootstrap/cache && \
-    chmod +x ${APP_ROOT}/artisan
+    chmod -R 775 ${APP_ROOT}/storage ${APP_ROOT}/bootstrap/cache
 
 RUN rm -rf ${WEB_ROOT} && \
         ln -s ${APP_ROOT}/public ${WEB_ROOT}
