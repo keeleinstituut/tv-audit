@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\AuthHelpers;
 
 class AuditLogControllerIndexTest extends AuditLogControllerTestCase
@@ -131,9 +132,7 @@ class AuditLogControllerIndexTest extends AuditLogControllerTestCase
         $this->assertIndexReturnsExpectedData($queryParameters, $logInEvents, $institutionId, false);
     }
 
-    /**
-     * @dataProvider provideSearchTextAndMatchingFactoryStates
-     */
+    #[DataProvider('provideSearchTextAndMatchingFactoryStates')]
     public function test_expected_records_returned_with_text_filter(string $searchText, array $matchingFactoryState): void
     {
         $institutionId = Str::uuid()->toString();

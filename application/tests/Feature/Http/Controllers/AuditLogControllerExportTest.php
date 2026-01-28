@@ -15,6 +15,7 @@ use Illuminate\Testing\TestResponse;
 use League\Csv\Exception;
 use League\Csv\InvalidArgument;
 use League\Csv\Reader;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\AuthHelpers;
 
 class AuditLogControllerExportTest extends AuditLogControllerTestCase
@@ -150,10 +151,9 @@ class AuditLogControllerExportTest extends AuditLogControllerTestCase
     }
 
     /**
-     * @dataProvider provideSearchTextAndMatchingFactoryStates
-     *
      * @throws Exception
      */
+    #[DataProvider('provideSearchTextAndMatchingFactoryStates')]
     public function test_expected_records_returned_with_text_filter(string $searchText, array $matchingFactoryState): void
     {
         $institutionId = Str::uuid()->toString();
