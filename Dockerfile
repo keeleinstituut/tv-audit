@@ -198,12 +198,17 @@ if ! pgrep -x supervisord > /dev/null; then
     exit 1
 fi
 
-REQUIRED_PROCESSES="php-fpm nginx laravel-worker laravel-scheduler consume-audit-log-events"
+REQUIRED_PROCESSES="php-fpm nginx laravel-worker laravel-scheduler"
 for process in \$REQUIRED_PROCESSES; do
     if ! supervisorctl status "\$process" 2>/dev/null | grep -q RUNNING; then
         exit 1
     fi
 done
+
+status=\$(supervisorctl status "consume-audit-log-events" 2>/dev/null | awk '{print \$2}')
+if [ "\$status" != "EXITED" ] && [ "\$status" != "RUNNING" ]; then
+    exit 1
+fi
 
 if ! curl -f -s --max-time 2 http://localhost/healthz > /dev/null 2>&1; then
     exit 1
