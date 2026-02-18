@@ -206,7 +206,13 @@ for process in \$REQUIRED_PROCESSES; do
 done
 
 status=\$(supervisorctl status "consume-audit-log-events" 2>/dev/null | awk '{print \$2}')
+if [ -z "\$status" ]; then
+    # If status is empty, supervisorctl failed or process doesn't exist - treat as unhealthy
+    echo "consume-audit-log-events: status is empty (process may not exist or supervisorctl failed)" >&2
+    exit 1
+fi
 if [ "\$status" != "EXITED" ] && [ "\$status" != "RUNNING" ]; then
+    echo "consume-audit-log-events: status is '\$status' (expected EXITED or RUNNING)" >&2
     exit 1
 fi
 
