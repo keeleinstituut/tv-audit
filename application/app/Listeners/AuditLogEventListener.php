@@ -34,7 +34,7 @@ class AuditLogEventListener
 
                 'actor_pic' => data_get($body, 'general.actor_pic'),
                 'actor_name' => data_get($body, 'general.actor_name'),
-                'actor_session' => data_get($body, 'general.actor_session', 'unknown'),
+                'actor_session' => data_get($body, 'general.actor_session'),
                 'actor_department_id' => data_get($body, 'general.actor_department_id'),
                 'actor_institution_id' => data_get($body, 'general.actor_institution_id'),
                 'actor_institution_user_id' => data_get($body, 'general.actor_institution_user_id'),
