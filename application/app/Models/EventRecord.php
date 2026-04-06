@@ -30,6 +30,9 @@ class EventRecord extends Model
         'request_body',
 
         'response_status_code',
+
+        'notification_type',
+        'notification_params',
     ];
 
     protected $casts = [
@@ -37,5 +40,6 @@ class EventRecord extends Model
         'request_body' => 'array',
         'request_query' => 'array',
         'happened_at' => 'datetime',
+        'notification_params' => 'array',
     ];
 }
