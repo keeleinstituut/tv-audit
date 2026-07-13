@@ -7,8 +7,8 @@
     "require": {
         "php": "^8.5",
         "darkaonline/l5-swagger": "^9.0",
-        "keeleinstituut/tv-common-laravel-amqp": "^0.0.74",
-        "keeleinstituut/tv-common-laravel-security": "^0.0.21",
+        "keeleinstituut/tv-common-laravel-amqp": "~0.0.90",
+        "keeleinstituut/tv-common-laravel-security": "~0.0.24",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.8",
         "league/csv": "^9.0"
